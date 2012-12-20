@@ -30,17 +30,17 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/API/KalturaPl
 //$firephp->warn($path, 'PATH');
 
 
-//define('PLUGIN_NAME', 'repository_kaltura');
-define('PLUGIN_NAME', 'kaltura'); // Moodle saves repository instance configuration variables without the repository_ prefix
-define('PROFILE_NAME', 'Moodle Repository Profile');
-define('PROFILE_SYSTEM_NAME', 'moodleprofile');
+//define('REPOSITORY_KALTURA_PLUGIN_NAME', 'repository_kaltura');
+define('REPOSITORY_KALTURA_PLUGIN_NAME', 'kaltura'); // Moodle saves repository instance configuration variables without the repository_ prefix
+define('REPOSITORY_KALTURA_PROFILE_NAME', 'Moodle Repository Profile');
+define('REPOSITORY_KALTURA_PROFILE_SYSTEM_NAME', 'moodleprofile');
 
-define('SYSTEM_SHARE', 'SystemShare');
-define('COURSE_SHARE', 'CourseShare');
+define('REPOSITORY_KALTURA_SYSTEM_SHARE', 'SystemShare');
+define('REPOSITORY_KALTURA_COURSE_SHARE', 'CourseShare');
 
-define('SHARED_PATH', '/shared');
-define('USED_PATH', '/used');
-define('SITE_SHARED_PATH', '/siteshare');
+define('REPOSITORY_KALTURA_SHARED_PATH', '/shared');
+define('REPOSITORY_KALTURA_USED_PATH', '/used');
+define('REPOSITORY_KALTURA_SITE_SHARED_PATH', '/siteshare');
 
 
 /**
@@ -49,16 +49,16 @@ define('SITE_SHARED_PATH', '/siteshare');
  * @param - none
  * @param mixed - string with profile information or false
  */
-function get_metadata_profile_info($connection) {
+function repository_kaltura_get_metadata_profile_info($connection) {
 
     // Get the profile object
-    $profile = get_metadata_profile($connection);
+    $profile = repository_kaltura_get_metadata_profile($connection);
 
     if (!$profile) {
         return false;
     }
 
-    $profile = format_metadata_profile($profile);
+    $profile = repository_kaltura_format_metadata_profile($profile);
 
     return $profile;
 
@@ -71,10 +71,10 @@ function get_metadata_profile_info($connection) {
  * @return mixed - KalturaMetadataProfile if profile was found, false if one
  * wasn't found
  */
-function get_metadata_profile($connection) {
+function repository_kaltura_get_metadata_profile($connection) {
     global $DB;
 
-    $profileid = get_config(PLUGIN_NAME, 'metadata_profile_id');
+    $profileid = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'metadata_profile_id');
     $profile = false;
 
     // Get the saved profile id
@@ -98,7 +98,7 @@ function get_metadata_profile($connection) {
         // Search for a profile by Name
         $filter = new KalturaMetadataProfileFilter();
         $filter->orderBy = 'CREATED_AT_ASC';
-        $filter->nameEqual = PROFILE_NAME;
+        $filter->nameEqual = REPOSITORY_KALTURA_PROFILE_NAME;
 
         $profile_list = $connection->metadataProfile->listAction($filter);
 
@@ -109,7 +109,7 @@ function get_metadata_profile($connection) {
         // Validate the profile
         foreach ($profile_list->objects as $key => $data) {
 
-            $profile = validate_metadata_profile($connection, $data);
+            $profile = repository_kaltura_validate_metadata_profile($connection, $data);
 
             // If validation passed use the profile
             if (false !== $profile) {
@@ -135,7 +135,7 @@ function get_metadata_profile($connection) {
  * @return mixed - a KalturaMetadataProfileFieldListResponse object or false
  *
  */
-function get_metadata_profile_fields($connection, $profileid) {
+function repository_kaltura_get_metadata_profile_fields($connection, $profileid) {
     $profile_fields = $connection->metadataProfile->listFields($profileid);
 
     if (!$profile_fields instanceof KalturaMetadataProfileFieldListResponse &&
@@ -157,7 +157,7 @@ function get_metadata_profile_fields($connection, $profileid) {
  *
  * @return mixed - xPath of field or false if it wasn't found
  */
-function get_metadata_share_field_path($connection, $profile_id, $field_key) {
+function repository_kaltura_get_metadata_share_field_path($connection, $profile_id, $field_key) {
 
 
     if (0 != strcmp('SystemShare', $field_key) &&
@@ -165,7 +165,7 @@ function get_metadata_share_field_path($connection, $profile_id, $field_key) {
             return false;
     }
 
-    $fields = get_metadata_profile_fields($connection, $profile_id);
+    $fields = repository_kaltura_get_metadata_profile_fields($connection, $profile_id);
     $xpath = false;
 
 
@@ -185,14 +185,14 @@ function get_metadata_share_field_path($connection, $profile_id, $field_key) {
  * @param - Kaltura connection object
  * @return mixed - KalturaMetadataProfileListResponse
  */
-function create_metadata_profile($connection) {
+function repository_kaltura_create_metadata_profile($connection) {
 
     require_once(dirname(__FILE__) . '/xsd_schema.php');
 
     $profile = new KalturaMetadataProfile();
-    $profile->name = PROFILE_NAME;
-    $profile->description = PROFILE_NAME . ' Do not remove.';
-    $profile->systemName = PROFILE_SYSTEM_NAME;
+    $profile->name = REPOSITORY_KALTURA_PROFILE_NAME;
+    $profile->description = REPOSITORY_KALTURA_PROFILE_NAME . ' Do not remove.';
+    $profile->systemName = REPOSITORY_KALTURA_PROFILE_SYSTEM_NAME;
 
     $profile->createMode = KalturaMetadataProfileCreateMode::API;
     $profile->metadataObjectType = KalturaMetadataObjectType::ENTRY;
@@ -214,7 +214,7 @@ function create_metadata_profile($connection) {
  * @return mixed - KalturaMetadataProfile if validation passed, false if
  * validation failed
  */
-function validate_metadata_profile($connection, $profile) {
+function repository_kaltura_validate_metadata_profile($connection, $profile) {
 
     if (!$profile instanceof KalturaMetadataProfile) {
         return false;
@@ -241,7 +241,7 @@ function validate_metadata_profile($connection, $profile) {
  * @param obj - KalturaMetadataProfile
  * @return string - information about the profile being used
  */
-function format_metadata_profile($profile) {
+function repository_kaltura_format_metadata_profile($profile) {
     if (!$profile instanceof KalturaMetadataProfile) {
         return 'Error formatting metadata profile information';
     }
@@ -260,15 +260,16 @@ function format_metadata_profile($profile) {
  * Create the root category structure in the KMC
  *
  * @param - Kaltura connection object
- * @return bool - true if success, else false
+ * @return mixed - an array with the root category path and the root category id
+ *  or false if something wrong happened
  */
-function create_root_category($connection) {
+function repository_kaltura_create_root_category($connection) {
 
     $first            = true;
     $parent_id        = '';
     $categories       = null;
-    $root_category    = get_config(PLUGIN_NAME, 'rootcategory');
-    $root_category_id = get_config(PLUGIN_NAME, 'rootcategory_id');
+    $root_category    = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'rootcategory');
+    $root_category_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'rootcategory_id');
     $duplicate        = false;
 
     // Split categories into an array
@@ -288,7 +289,7 @@ function create_root_category($connection) {
         }
 
         // Check if the category already exists.  If any exists then we cannot create the category
-        if (category_path_exists($connection, $category_to_created)) {
+        if (repository_kaltura_category_path_exists($connection, $category_to_created)) {
             $duplicate = true;
             break;
         }
@@ -303,9 +304,9 @@ function create_root_category($connection) {
     foreach ($categories as $category_name) {
 
         if ($first) {
-            $result = create_category($connection, $category_name);
+            $result = repository_kaltura_create_category($connection, $category_name);
         } else {
-            $result = create_category($connection, $category_name, $parent_id);
+            $result = repository_kaltura_create_category($connection, $category_name, $parent_id);
         }
 
         if (!empty($result)) {
@@ -322,10 +323,10 @@ function create_root_category($connection) {
     }
 
     // Save configuration
-    set_config('rootcategory', $root_category, PLUGIN_NAME);
-    set_config('rootcategory_id', $result->id, PLUGIN_NAME);
+    set_config('rootcategory', $root_category, REPOSITORY_KALTURA_PLUGIN_NAME);
+    set_config('rootcategory_id', $result->id, REPOSITORY_KALTURA_PLUGIN_NAME);
 
-    return $result;
+    return array($root_category, $result->id);
 }
 
 /**
@@ -337,7 +338,7 @@ function create_root_category($connection) {
  * @param int - (optional) parent id
  * @return mixed - KalturaCategory if category was created, otherwise false
  */
- function create_category($connection, $name, $parent_id = 0) {
+ function repository_kaltura_create_category($connection, $name, $parent_id = 0) {
 
     if (empty($name)) {
         return false;
@@ -367,7 +368,7 @@ function create_root_category($connection) {
  * @param int - (optional) parent id
  * @return bool - true if category exists, otherwise false
  */
-function category_exists($connection, $name, $parent_id = 0) {
+function repository_kaltura_category_exists($connection, $name, $parent_id = 0) {
     // TODO: is this function still needed?
 }
 
@@ -378,8 +379,7 @@ function category_exists($connection, $name, $parent_id = 0) {
  * @param string - category fullName path
  * @return bool - true if category with fullName path exists. Else false
  */
-function category_id_path_exists($connection, $category_id, $path) {
-    // TODO: Is this function still needed?
+function repository_kaltura_category_id_path_exists($connection, $category_id, $path) {
     if (empty($path) || empty($category_id)) {
         return false;
     }
@@ -410,7 +410,7 @@ function category_id_path_exists($connection, $category_id, $path) {
  * @param string - category fullName path
  * @return mixed - KalturaCategory if path exists, otherwise false
  */
-function category_path_exists($connection, $path) {
+function repository_kaltura_category_path_exists($connection, $path) {
 
     if (empty($path)) {
         return false;
@@ -420,8 +420,9 @@ function category_path_exists($connection, $path) {
     $filter->fullNameEqual = $path;
     $result = $connection->category->listAction($filter);
 
+    // "<=" temp solution to KALDEV-401
     if ($result instanceof KalturaCategoryListResponse &&
-        1 == $result->totalCount) {
+        1 <= $result->totalCount) {
 
         if ($result->objects[0] instanceof KalturaCategory) {
             return $result->objects[0];
@@ -441,22 +442,27 @@ function category_path_exists($connection, $path) {
  *
  * @return KalturaCategory object, or false if it failed to create one
  */
-function create_course_category($connection, $courseid) {
+function repository_kaltura_create_course_category($connection, $courseid) {
 
     // Get the root category path
-    $root_path = get_config(PLUGIN_NAME, 'rootcategory');
+    $root_path = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'rootcategory');
 
+    // Check if the root category path is an empty string
+    if (empty($root_path)) {
+        return false;
+    }
     $path = $root_path . '>' . $courseid;
 
+
     // Check if the category exists
-    $course_category = category_path_exists($connection, $path);
+    $course_category = repository_kaltura_category_path_exists($connection, $path);
 
     if (!$course_category) {
 
-        $root_id = get_config(PLUGIN_NAME, 'rootcategory_id');
+        $root_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'rootcategory_id');
 
         // Create category
-        $course_category = create_category($connection, $courseid, $root_id);
+        $course_category = repository_kaltura_create_category($connection, $courseid, $root_id);
 
         if (!$course_category) {
             return false;
@@ -476,7 +482,7 @@ function create_course_category($connection, $courseid) {
  * @return array - array of courses that the user has access to for the given
  * capability.  Or an empty array if they have no access
  */
-function get_course_access_list($capability = '') {
+function repository_kaltura_get_course_access_list($capability = '') {
     global $DB, $SESSION, $USER;
 
     // Retrieve access data from the session global
@@ -492,7 +498,7 @@ function get_course_access_list($capability = '') {
         $SESSION->kalrepo = array(array());
     }
 
-    $user_role_access = get_user_kaltura_repo_access($USER->id, $capability);
+    $user_role_access = repository_kaltura_get_user_kaltura_repo_access($USER->id, $capability);
 
     // Find roles that have this capability in the system context
     $roles_with_cap = get_roles_with_caps_in_context(get_context_instance(CONTEXT_SYSTEM), array($capability));
@@ -502,9 +508,10 @@ function get_course_access_list($capability = '') {
 
     foreach ($user_role_access['ra'] as $role_assign_context_path => $roles_array) {
 
-
-        $role_assign_context_id = end(explode('/', $role_assign_context_path));
-        $role_assign_context = get_context_instance_by_id($role_assign_context_id);
+        $context_path           = $role_assign_context_path;
+        $context_path           = explode('/', $context_path);
+        $role_assign_context_id = end($context_path);
+        $role_assign_context    = get_context_instance_by_id($role_assign_context_id);
 
         // Check if the user has a role assignment with the capability set to allowed
         $user_role_with_cap = array_intersect($roles_array, $roles_with_cap);
@@ -514,7 +521,7 @@ function get_course_access_list($capability = '') {
             foreach ($user_role_with_cap as $roleid) {
 
                 // Get all courses under the context and create a list of courses the user can search from
-                $courses = get_all_courses_in_context($role_assign_context_id);
+                $courses = repository_kaltura_get_all_courses_in_context($role_assign_context_id);
 
                 // add arrays to avoid re-indexing array
                 $final_courses = $final_courses + $courses;
@@ -576,7 +583,7 @@ function get_course_access_list($capability = '') {
 
             foreach ($roles_array as $roleid) {
 
-                $courses = get_all_courses_in_context($role_assign_context_id);
+                $courses = repository_kaltura_get_all_courses_in_context($role_assign_context_id);
 
                 // add arrays to avoid re-indexing array
                 $final_courses = $final_courses + $courses;
@@ -607,7 +614,7 @@ function get_course_access_list($capability = '') {
 
 }
 
-function get_all_courses_in_context($context_id) {
+function repository_kaltura_get_all_courses_in_context($context_id) {
     global $DB;
 
     $context = get_context_instance_by_id($context_id);
@@ -675,7 +682,7 @@ function get_all_courses_in_context($context_id) {
  * @param int $userid - the id of the user
  * @return array
  */
-function get_user_kaltura_repo_access($userid, $capability) {
+function repository_kaltura_get_user_kaltura_repo_access($userid, $capability) {
     global $CFG, $DB;
 
     /* Get in 3 cheap DB queries...
@@ -820,10 +827,10 @@ function get_user_kaltura_repo_access($userid, $capability) {
  *
  * @return array - structured repository video entity
  */
-function format_data($video_data, $uri, $partner_id, $uiconf_id) {
+function repository_kaltura_format_data($video_data, $uri, $partner_id, $uiconf_id) {
 
     $results     = array();
-    $changed_uri = rtrim($uri, '/');
+    $name        = '';
 
     if (empty($video_data)) {
         return $results;
@@ -835,29 +842,33 @@ function format_data($video_data, $uri, $partner_id, $uiconf_id) {
 
         // the /v/flash is required in order to trick the TinyMCE popup and force it to display flash
         switch ($video->mediaType) {
+            case KalturaMediaType::AUDIO:  // May need a special case to handle audio files
             case KalturaMediaType::VIDEO:
-            case KalturaMediaType::AUDIO:
-                $source = $changed_uri.'/index.php/kwidget/wid/_'.$partner_id.
+                $name = $video->name . '.avi'; // Manually adding an image extension.  This is only to force moodle to display the correct icons
+                $source = $uri .'/index.php/kwidget/wid/_'.$partner_id.
                           '/uiconf_id/'.$uiconf_id.'/entry_id/' . $video->id . '/v/flash#'.
                           $video->name;
                 break;
 
             case KalturaMediaType::IMAGE:
+                $name = $video->name . '.png'; // Manually adding an image extension.  This is only to force moodle to display the correct icons
                 $source = $video->thumbnailUrl . '/height/200/width/300/type/1/v/flash#'. $video->name;
                 break;
             default:
+                $name   = 'Unknown Media Type';
                 $source = 'Unknown Media Type';
 
         }
 
-        $results[] = array('title' => $video->name,
+        $results[] = array('title' => $name,
                            'shorttitle' => $video->name,
                            'date' => userdate($video->updatedAt),
                            'thumbnail' => $video->thumbnailUrl,
                            'thumbnail_width' => 150,
                            'thumbnail_height' => 70,
-                           'source' => $source,
+                           'source' =>  $source,
                            'hasauthor' => true,
+                           //'url' => '',
                            'haslicense' => true
                             );
 
@@ -877,12 +888,12 @@ function format_data($video_data, $uri, $partner_id, $uiconf_id) {
  *
  * @return KalturaFilterPager obj
  */
-function create_pager($page_index = 0, $items_per_page = 0) {
+function repository_kaltura_create_pager($page_index = 0, $items_per_page = 0) {
 
     $page = new KalturaFilterPager();
 
     if (empty($items_per_page)) {
-        $page->pageSize = get_config(PLUGIN_NAME, 'itemsperpage');
+        $page->pageSize = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'itemsperpage');
     } else {
         $page->pageSize = $items_per_page;
     }
@@ -904,7 +915,7 @@ function create_pager($page_index = 0, $items_per_page = 0) {
  * @param array - an array of Moodle course ids
  * @param string - prefix for the course path.
  */
-function create_courses_folders($courses, $path_prefix) {
+function repository_kaltura_create_courses_folders($courses, $path_prefix) {
     global $OUTPUT, $DB;
 
     $results       = array();
@@ -923,7 +934,7 @@ function create_courses_folders($courses, $path_prefix) {
     }
 
     foreach ($records as $courseid => $data) {
-        $results[] = create_folder($data->fullname, $data->shortname, "{$path_prefix}/{$data->shortname}");
+        $results[] = repository_kaltura_create_folder($data->fullname, $data->shortname, "{$path_prefix}/{$data->shortname}");
     }
 
     return $results;
@@ -947,7 +958,7 @@ function create_courses_folders($courses, $path_prefix) {
  *
  * @return array - repository file picker structure
  */
-function get_system_shared_listing($ret, $path, $system_access, $shared_access, $page = 1) {
+function repository_kaltura_get_system_shared_listing($ret, $path, $system_access, $shared_access, $page = 1) {
 
     $newpath = array();
     $listing = array();
@@ -959,39 +970,39 @@ function get_system_shared_listing($ret, $path, $system_access, $shared_access, 
 
         $name       = get_string('folder_site_shared_videos', 'repository_kaltura');
         $short_name = get_string('folder_site_shared_videos_shortname', 'repository_kaltura');
-        $listing[]  = create_folder($name, $short_name, SITE_SHARED_PATH);
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SITE_SHARED_PATH);
 
         $name       = get_string('folder_shared_videos', 'repository_kaltura');
         $short_name = get_string('folder_shared_videos_shortname', 'repository_kaltura');
-        $listing[]  = create_folder($name, $short_name, SHARED_PATH);
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SHARED_PATH);
 
         $name       = get_string('folder_used_videos', 'repository_kaltura');
         $short_name = get_string('folder_used_videos_shortname', 'repository_kaltura');
-        $listing[]  = create_folder($name, $short_name, USED_PATH);
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_USED_PATH);
 
         $ret['path'] = $newpath;
         $ret['list'] = $listing;
 
-    } else if (false !== strpos($path, SHARED_PATH)) { // If the user is in the shared folder
+    } else if (false !== strpos($path, REPOSITORY_KALTURA_SHARED_PATH)) { // If the user is in the shared folder
 
-        $ret_temp = get_course_video_listing($shared_access, $path, SHARED_PATH, $page);
+        $ret_temp = repository_kaltura_get_course_video_listing($shared_access, $path, REPOSITORY_KALTURA_SHARED_PATH, $page);
         $ret = array_merge($ret, $ret_temp);
 
-    } else if (false !== strpos($path, SITE_SHARED_PATH)) { // If the user is in the site shared folder
+    } else if (false !== strpos($path, REPOSITORY_KALTURA_SITE_SHARED_PATH)) { // If the user is in the site shared folder
 
-        $ret_temp = get_site_video_listing($path, SITE_SHARED_PATH, $page);
+        $ret_temp = repository_kaltura_get_site_video_listing($path, REPOSITORY_KALTURA_SITE_SHARED_PATH, $page);
         $ret = array_merge($ret, $ret_temp);
 
     } else {
 
-        $ret_temp = get_course_video_listing($system_access, $path, USED_PATH, $page);
+        $ret_temp = repository_kaltura_get_course_video_listing($system_access, $path, REPOSITORY_KALTURA_USED_PATH, $page);
         $ret = array_merge($ret, $ret_temp);
     }
 
     return $ret;
 }
 
-function get_shared_listing($ret, $path, $shared_access, $page = 1) {
+function repository_kaltura_get_shared_listing($ret, $path, $shared_access, $page = 1) {
 
     $newpath = array();
     $listing = array();
@@ -1003,23 +1014,23 @@ function get_shared_listing($ret, $path, $shared_access, $page = 1) {
 
         $name       = get_string('folder_site_shared_videos', 'repository_kaltura');
         $short_name = get_string('folder_site_shared_videos_shortname', 'repository_kaltura');
-        $listing[]  = create_folder($name, $short_name, SITE_SHARED_PATH);
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SITE_SHARED_PATH);
 
         $name       = get_string('folder_shared_videos', 'repository_kaltura');
         $short_name = get_string('folder_shared_videos_shortname', 'repository_kaltura');
-        $listing[]  = create_folder($name, $short_name, SHARED_PATH);
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SHARED_PATH);
 
         $ret['path'] = $newpath;
         $ret['list'] = $listing;
 
-    } else if (false !== strpos($path, SHARED_PATH)) { // If the user is in the shared folder
+    } else if (false !== strpos($path, REPOSITORY_KALTURA_SHARED_PATH)) { // If the user is in the shared folder
 
-        $ret_temp = get_course_video_listing($shared_access, $path, SHARED_PATH, $page);
+        $ret_temp = repository_kaltura_get_course_video_listing($shared_access, $path, REPOSITORY_KALTURA_SHARED_PATH, $page);
         $ret = array_merge($ret, $ret_temp);
 
-    } else if (false !== strpos($path, SITE_SHARED_PATH)) { // If the user is in the site shared folder
+    } else if (false !== strpos($path, REPOSITORY_KALTURA_SITE_SHARED_PATH)) { // If the user is in the site shared folder
 
-        $ret_temp = get_site_video_listing($path, SITE_SHARED_PATH, $page);
+        $ret_temp = repository_kaltura_get_site_video_listing($path, REPOSITORY_KALTURA_SITE_SHARED_PATH, $page);
         $ret = array_merge($ret, $ret_temp);
 
     }
@@ -1034,10 +1045,10 @@ function get_shared_listing($ret, $path, $shared_access, $page = 1) {
  * site.
  *
  * @param string - navigation crumb trail if either /shared or /used is passed
- * @param string - either constant SHARED_PATH or USED_PATH
+ * @param string - either constant REPOSITORY_KALTURA_SHARED_PATH or REPOSITORY_KALTURA_USED_PATH
  * @param int - current page
  */
-function get_site_video_listing($path, $type_path, $page) {
+function repository_kaltura_get_site_video_listing($path, $type_path, $page) {
 
     $newpath     = array();
     $listing     = array();
@@ -1053,12 +1064,12 @@ function get_site_video_listing($path, $type_path, $page) {
     $sub_crumb = get_string('crumb_site_shared', 'repository_kaltura');
     $type = 'site_shared';
 
-    $page_size = get_config(PLUGIN_NAME, 'itemsperpage');
+    $page_size = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'itemsperpage');
 
     // If they are deeper than the root of the course folder then determine the course
     // and display the videos for the course
     $kaltura    = new kaltura_connection();
-    $connection = $kaltura->get_connection(true, 86400);
+    $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
     // Build navigation path
     $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
@@ -1066,20 +1077,21 @@ function get_site_video_listing($path, $type_path, $page) {
 
     $empty_list = array();
 
-    $search_results = search_videos($connection, '', '',
+    $search_results = repository_kaltura_search_videos($connection, '', '',
                                     $empty_list, $page,
                                     $type);
 
-    $uri        = get_host();
-    $partner_id = get_partner_id();
-    $ui_conf_id = get_player_uiconf();
-    $listing    = format_data($search_results, $uri, $partner_id, $ui_conf_id);
+    $uri         = local_kaltura_get_host();
+    $uri         = rtrim($uri, '/');
+    $partner_id  = local_kaltura_get_partner_id();
+    $ui_conf_id  = local_kaltura_get_player_uiconf();
+    $listing     = repository_kaltura_format_data($search_results, $uri, $partner_id, $ui_conf_id);
 
     $ret['path'] = $newpath;
     $ret['list'] = $listing;
 
 
-    if ($search_results->totalCount > $page_size) {
+    if (!empty($search_results) && $search_results->totalCount > $page_size) {
 
         $ret['page'] = $page;
         $ret['pages'] = ceil($search_results->totalCount / $page_size);
@@ -1102,10 +1114,10 @@ function get_site_video_listing($path, $type_path, $page) {
  *
  * @param array - an array of Moodle course ids (keys are moodle course ids)
  * @param string - navigation crumb trail if either /shared or /used is passed
- * @param string - either constant SHARED_PATH or USED_PATH
+ * @param string - either constant REPOSITORY_KALTURA_SHARED_PATH or REPOSITORY_KALTURA_USED_PATH
  * @param int - current page
  */
-function get_course_video_listing($courses, $path, $type_path = SHARED_PATH, $page = 1) {
+function repository_kaltura_get_course_video_listing($courses, $path, $type_path = REPOSITORY_KALTURA_SHARED_PATH, $page = 1) {
 
     global $DB;
 
@@ -1125,12 +1137,12 @@ function get_course_video_listing($courses, $path, $type_path = SHARED_PATH, $pa
     }
 
     // Check if the type page has valid data
-    if (0 == strcmp(SHARED_PATH, $type_path)) {
+    if (0 == strcmp(REPOSITORY_KALTURA_SHARED_PATH, $type_path)) {
 
         $sub_crumb = get_string('crumb_shared', 'repository_kaltura');
         $type = 'shared';
 
-    } else if (0 == strcmp(USED_PATH, $type_path)) {
+    } else if (0 == strcmp(REPOSITORY_KALTURA_USED_PATH, $type_path)) {
 
         $sub_crumb = get_string('crumb_used', 'repository_kaltura');
         $type = 'used';
@@ -1140,7 +1152,7 @@ function get_course_video_listing($courses, $path, $type_path = SHARED_PATH, $pa
         return $ret;
     }
 
-    $page_size = get_config(PLUGIN_NAME, 'itemsperpage');
+    $page_size = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'itemsperpage');
 
     // If there is only one '/' in the path then we are looking at course folders
     if (1 == substr_count($path, '/')) {
@@ -1148,7 +1160,7 @@ function get_course_video_listing($courses, $path, $type_path = SHARED_PATH, $pa
         $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
         $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
 
-        $listing = create_courses_folders($courses, $path);
+        $listing = repository_kaltura_create_courses_folders($courses, $path);
 
         $ret['path'] = $newpath;
         $ret['list'] = $listing;
@@ -1158,7 +1170,7 @@ function get_course_video_listing($courses, $path, $type_path = SHARED_PATH, $pa
         // If they are deeper than the root of the course folder then determine the course
         // and display the videos for the course
         $kaltura    = new kaltura_connection();
-        $connection = $kaltura->get_connection(true, 86400);
+        $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
         // Build navigation path
         $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
@@ -1175,20 +1187,19 @@ function get_course_video_listing($courses, $path, $type_path = SHARED_PATH, $pa
 
         $course = array($course->id => $course);
 
-        $search_results = search_videos($connection, '', '',
+        $search_results = repository_kaltura_search_videos($connection, '', '',
                                         $course, $page,
                                         $type);
 
-        $uri        = get_host();
-        $partner_id = get_partner_id();
-        $ui_conf_id = get_player_uiconf();
-        $listing    = format_data($search_results, $uri, $partner_id, $ui_conf_id);
+        $uri        = local_kaltura_get_host();
+        $partner_id = local_kaltura_get_partner_id();
+        $ui_conf_id = local_kaltura_get_player_uiconf();
+        $listing    = repository_kaltura_format_data($search_results, $uri, $partner_id, $ui_conf_id);
 
         $ret['path'] = $newpath;
         $ret['list'] = $listing;
 
-
-        if ($search_results->totalCount > $page_size) {
+        if (!empty($search_resultst) && $search_results->totalCount > $page_size) {
 
             $ret['page'] = $page;
             $ret['pages'] = ceil($search_results->totalCount / $page_size);
@@ -1214,7 +1225,7 @@ function get_course_video_listing($courses, $path, $type_path = SHARED_PATH, $pa
  *
  * @return array - array structure for displaying a single file picker folder
  */
-function create_folder($fullname, $shortname, $path) {
+function repository_kaltura_create_folder($fullname, $shortname, $path) {
     global $OUTPUT;
 
     return array('title'      => $fullname,
@@ -1245,20 +1256,20 @@ function create_folder($fullname, $shortname, $path) {
  *
  * @return array
  */
-function search_own_videos($connection, $name, $tags, $page_index = 0, $videos_per_page = 0, $override_filter_search = '') {
+function repository_kaltura_search_own_videos($connection, $name, $tags, $page_index = 0, $videos_per_page = 0, $override_filter_search = '') {
 
     global $USER;
 
     $results = array();
 
     // Create filter
-    $filter = create_media_filter($name, $tags, $override_filter_search);
+    $filter = repository_kaltura_create_media_filter($name, $tags, $override_filter_search);
 
     // Filter vidoes with the user's username as the user id
     $filter->userIdEqual = $USER->username;
 
     // Create pager object
-    $pager = create_pager($page_index, $videos_per_page);
+    $pager = repository_kaltura_create_pager($page_index, $videos_per_page);
 
     // Get results
     $results = $connection->media->listAction($filter, $pager);
@@ -1280,20 +1291,20 @@ function search_own_videos($connection, $name, $tags, $page_index = 0, $videos_p
  *
  * @return array
  */
-function search_mymedia_videos($connection, $search = '', $page_index = 0, $videos_per_page = 0) {
+function repository_kaltura_search_mymedia_videos($connection, $search = '', $page_index = 0, $videos_per_page = 0) {
 
     global $USER;
 
     $results = array();
 
     // Create filter
-    $filter = create_mymedia_filter($search);
+    $filter = repository_kaltura_create_mymedia_filter($search);
 
     // Filter vidoes with the user's username as the user id
     $filter->userIdEqual = $USER->username;
 
     // Create pager object
-    $pager = create_pager($page_index, $videos_per_page);
+    $pager = repository_kaltura_create_pager($page_index, $videos_per_page);
 
     // Get results
     $results = $connection->media->listAction($filter, $pager);
@@ -1315,26 +1326,26 @@ function search_mymedia_videos($connection, $search = '', $page_index = 0, $vide
  *
  * @return array
  */
-function search_videos($connection, $name, $tags, $courses = array(), $page_index = 0, $search_for = 'shared') {
+function repository_kaltura_search_videos($connection, $name, $tags, $courses = array(), $page_index = 0, $search_for = 'shared') {
 
     $results = array();
 
     // Create filter
-    $filter = create_media_filter($name, $tags);
+    $filter = repository_kaltura_create_media_filter($name, $tags);
 
     if (!empty($courses)) {
 
         switch ($search_for) {
             case 'shared':
-                $results = retrieve_shared_videos($connection, $filter, $courses, $page_index);
+                $results = repository_kaltura_retrieve_shared_videos($connection, $filter, $courses, $page_index);
                 break;
             case 'used':
-                $results = retrieve_used_videos($connection, $filter, $courses, $page_index);
+                $results = repository_kaltura_retrieve_used_videos($connection, $filter, $courses, $page_index);
                 break;
         }
     } elseif (0 == strcmp('site_shared', $search_for)) {
 
-        $results = retrieve_site_shared_videos($connection, $filter, $page_index);
+        $results = repository_kaltura_retrieve_site_shared_videos($connection, $filter, $page_index);
     }
 
     return $results;
@@ -1345,28 +1356,28 @@ function search_videos($connection, $name, $tags, $courses = array(), $page_inde
  * This function retrieves videos that have been shared with the site
  *
  * @param obj - Kaltura connection object
- * @param obj - KalturaMediaEntryFilter @see create_media_filter()
+ * @param obj - KalturaMediaEntryFilter @see repository_kaltura_create_media_filter()
  * @param int - current page index
  */
-function retrieve_site_shared_videos($connection, $filter, $page_index) {
+function repository_kaltura_retrieve_site_shared_videos($connection, $filter, $page_index) {
     $results = array();
 
     // Get metadata profile id
     // Retrieve the custom metadata profile id from the repository configuration option
-    // This is a big performance gain as opposed to using @see get_metadata_profile()
-    $metadata_profile_id = get_config(PLUGIN_NAME, 'metadata_profile_id');
+    // This is a big performance gain as opposed to using @see repository_kaltura_get_metadata_profile()
+    $metadata_profile_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'metadata_profile_id');
 
     if (empty($metadata_profile_id)) {
         return array();
     }
 
     // Get the xPath for the field we are searching against
-    $xpath = get_metadata_share_field_path($connection, $metadata_profile_id, SYSTEM_SHARE);
+    $xpath = repository_kaltura_get_metadata_share_field_path($connection, $metadata_profile_id, REPOSITORY_KALTURA_SYSTEM_SHARE);
 
     // Create the advanced search filter
     if (false !== $xpath) {
 
-        $adv_filter = create_site_shared_adv_search_filter($xpath, $metadata_profile_id);
+        $adv_filter = repository_kaltura_create_site_shared_adv_search_filter($xpath, $metadata_profile_id);
 
         if (false === $adv_filter) {
             return array();
@@ -1377,7 +1388,7 @@ function retrieve_site_shared_videos($connection, $filter, $page_index) {
     }
 
     // Create pager object
-    $pager = create_pager($page_index);
+    $pager = repository_kaltura_create_pager($page_index);
 
     // Get results
     $results = $connection->media->listAction($filter, $pager);
@@ -1389,15 +1400,15 @@ function retrieve_site_shared_videos($connection, $filter, $page_index) {
  * This function retrieves videos whose categories match the Moodle course ids.
  *
  * @param obj - Kaltura connection object
- * @param obj - KalturaMediaEntryFilter @see create_media_filter()
+ * @param obj - KalturaMediaEntryFilter @see repository_kaltura_create_media_filter()
  * @param array - an array of Moodle courses to filter videos results by
  * @param int - current page index
  */
-function retrieve_used_videos($connection, $filter, $courses, $page_index) {
+function repository_kaltura_retrieve_used_videos($connection, $filter, $courses, $page_index) {
 
     $results = array();
     $categories   = '';
-    $rootcategory = get_config(PLUGIN_NAME, 'rootcategory');
+    $rootcategory = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'rootcategory');
 
     foreach ($courses as $courseid => $data) {
         $categories .= $rootcategory . '>' . $courseid . ',';
@@ -1408,7 +1419,7 @@ function retrieve_used_videos($connection, $filter, $courses, $page_index) {
     $filter->categoriesMatchOr = $categories;
 
     // Create pager object
-    $pager = create_pager($page_index);
+    $pager = repository_kaltura_create_pager($page_index);
 
     // Get results
     $results = $connection->media->listAction($filter, $pager);
@@ -1420,31 +1431,31 @@ function retrieve_used_videos($connection, $filter, $courses, $page_index) {
  * This function retrieves videos whose metadata contains Moodle course ids.
  *
  * @param obj - Kaltura connection object
- * @param obj - KalturaMediaEntryFilter @see create_media_filter()
+ * @param obj - KalturaMediaEntryFilter @see repository_kaltura_create_media_filter()
  * @param array - an array of Moodle courses (keys are course ids) to filter
  * videos results by
  * @param int - current page index
  */
-function retrieve_shared_videos($connection, $filter, $courses, $page_index) {
+function repository_kaltura_retrieve_shared_videos($connection, $filter, $courses, $page_index) {
 
     $results = array();
 
     // Get metadata profile id
     // Retrieve the custom metadata profile id from the repository configuration option
-    // This is a big performance gain as opposed to using @see get_metadata_profile()
-    $metadata_profile_id = get_config(PLUGIN_NAME, 'metadata_profile_id');
+    // This is a big performance gain as opposed to using @see repository_kaltura_get_metadata_profile()
+    $metadata_profile_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'metadata_profile_id');
 
     if (empty($metadata_profile_id)) {
         return array();
     }
 
     // Get the xPath for the field we are searching against
-    $xpath = get_metadata_share_field_path($connection, $metadata_profile_id, COURSE_SHARE);
+    $xpath = repository_kaltura_get_metadata_share_field_path($connection, $metadata_profile_id, REPOSITORY_KALTURA_COURSE_SHARE);
 
     // Create the advanced search filter
     if (false !== $xpath) {
 
-        $adv_filter = create_course_shared_adv_search_filter($courses, $xpath, $metadata_profile_id);
+        $adv_filter = repository_kaltura_create_course_shared_adv_search_filter($courses, $xpath, $metadata_profile_id);
 
         if (false === $adv_filter) {
             return array();
@@ -1455,7 +1466,7 @@ function retrieve_shared_videos($connection, $filter, $courses, $page_index) {
     }
 
     // Create pager object
-    $pager = create_pager($page_index);
+    $pager = repository_kaltura_create_pager($page_index);
 
     // Get results
     $results = $connection->media->listAction($filter, $pager);
@@ -1470,12 +1481,12 @@ function retrieve_shared_videos($connection, $filter, $courses, $page_index) {
  * @param array - an array of Moodle course ids (keys are course ids)
  *
  * @param string - xpath of the metadata field @see
- * get_metadata_share_field_path()
+ * repository_kaltura_get_metadata_share_field_path()
  *
  * @param mixed - KalturaMetadataProfile id or false if something went horribly
  * wrong
  */
-function create_course_shared_adv_search_filter($courses, $xpath, $profile_id) {
+function repository_kaltura_create_course_shared_adv_search_filter($courses, $xpath, $profile_id) {
 
     $adv_filter       = false;
     $search_condition = array();
@@ -1483,13 +1494,13 @@ function create_course_shared_adv_search_filter($courses, $xpath, $profile_id) {
     foreach ($courses as $courseid => $data) {
 
         // Create Metadata filter
-        $search_condition[] = create_metadata_filter($courseid, $xpath);
+        $search_condition[] = repository_kaltura_create_metadata_filter($courseid, $xpath);
     }
 
     if (!empty($search_condition)) {
 
         // Create the the metadata search item object
-        $adv_filter = create_metadata_search_items($search_condition, $profile_id);
+        $adv_filter = repository_kaltura_create_metadata_search_items($search_condition, $profile_id);
     }
 
     return $adv_filter;
@@ -1500,22 +1511,22 @@ function create_course_shared_adv_search_filter($courses, $xpath, $profile_id) {
  * search filter
  *
  * @param string - xpath of the metadata field @see
- * get_metadata_share_field_path()
+ * repository_kaltura_get_metadata_share_field_path()
  *
  * @param mixed - KalturaMetadataProfile id or false if something went horribly
  * wrong
  */
-function create_site_shared_adv_search_filter($xpath, $profile_id) {
+function repository_kaltura_create_site_shared_adv_search_filter($xpath, $profile_id) {
     $adv_filter       = false;
     $search_condition = array();
 
     // Create Metadata filter
-    $search_condition[] = create_metadata_filter(1, $xpath);
+    $search_condition[] = repository_kaltura_create_metadata_filter(1, $xpath);
 
     if (!empty($search_condition)) {
 
         // Create the the metadata search item object
-        $adv_filter = create_metadata_search_items($search_condition, $profile_id);
+        $adv_filter = repository_kaltura_create_metadata_search_items($search_condition, $profile_id);
     }
 
     return $adv_filter;
@@ -1526,13 +1537,13 @@ function create_site_shared_adv_search_filter($xpath, $profile_id) {
  * filter
  *
  * @param array - an array of KalturaSearchCondition objects @see
- * create_metadata_filter()
+ * repository_kaltura_create_metadata_filter()
  *
  * @param mixed - a KalturaMetadataProfile id, or false if something went wrong
  *
  * @return obj - KalturaMetadataSearchItem
  */
-function create_metadata_search_items($search_conditions, $profile_id) {
+function repository_kaltura_create_metadata_search_items($search_conditions, $profile_id) {
 
     $adv_search = new KalturaMetadataSearchItem();
     $adv_search->type = KalturaSearchOperatorType::SEARCH_OR;
@@ -1551,7 +1562,7 @@ function create_metadata_search_items($search_conditions, $profile_id) {
  *
  * @return KalturaSearchCondition - search condition object
  */
-function create_metadata_filter($course_id, $field_xpath) {
+function repository_kaltura_create_metadata_filter($course_id, $field_xpath) {
 
     $filter_item = new KalturaSearchCondition();
     $filter_item->field = $field_xpath;
@@ -1574,7 +1585,7 @@ function create_metadata_filter($course_id, $field_xpath) {
  *
  * @return KalturaMediaEntryFilter - filter object
  */
-function create_media_filter($name, $tags, $multi_override = '') {
+function repository_kaltura_create_media_filter($name, $tags, $multi_override = '') {
 
     $filter = new KalturaMediaEntryFilter();
 
@@ -1623,7 +1634,7 @@ function create_media_filter($name, $tags, $multi_override = '') {
  *
  * @return KalturaMediaEntryFilter - filter object
  */
-function create_mymedia_filter($search) {
+function repository_kaltura_create_mymedia_filter($search) {
 
     $filter = new KalturaMediaEntryFilter();
 
@@ -1647,7 +1658,7 @@ function create_mymedia_filter($search) {
  * @param int - 1 to create site share metadata or 0 to not create it
  * @return string - XML
  */
-function create_site_share_metadata_xml($global_share = 0) {
+function repository_kaltura_create_site_share_metadata_xml($global_share = 0) {
     $xml = '';
 
     if (!empty($global_share)) {
@@ -1665,7 +1676,7 @@ function create_site_share_metadata_xml($global_share = 0) {
  * @param array - array of course ids
  * @return string - XML
  */
-function create_course_share_metadata_xml($courses = array()) {
+function repository_kaltura_create_course_share_metadata_xml($courses = array()) {
     $xml = '';
 
     foreach ($courses as $course) {
@@ -1714,13 +1725,13 @@ function create_course_share_metadata_xml($courses = array()) {
  * @return mixed - true if successful, otherwise false, or a string if an
  * exception was thrown.
  */
-function update_video_custom_metadata($connection, $entry_id, $gshare = 'x', $cshare = 'x') {
+function repository_kaltura_update_video_custom_metadata($connection, $entry_id, $gshare = 'x', $cshare = 'x') {
 
     try {
 
         // Retrieve the custom metadata profile id from the repository configuration option
-        // This is a big performance gain as opposed to using @see get_metadata_profile()
-        $metadata_profile_id = get_config(PLUGIN_NAME, 'metadata_profile_id');
+        // This is a big performance gain as opposed to using @see repository_kaltura_get_metadata_profile()
+        $metadata_profile_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'metadata_profile_id');
 
         if (!$metadata_profile_id) {
             return false;
@@ -1730,7 +1741,7 @@ function update_video_custom_metadata($connection, $entry_id, $gshare = 'x', $cs
             return false;
         }
 
-        $metadata_list_data = get_video_custom_metadata($connection, $metadata_profile_id, $entry_id);
+        $metadata_list_data = repository_kaltura_get_video_custom_metadata($connection, $metadata_profile_id, $entry_id);
 
         // If the video is not an instance of KalturaMetadataListResponse, then we must add metadata schema
         // To the video
@@ -1760,6 +1771,17 @@ function update_video_custom_metadata($connection, $entry_id, $gshare = 'x', $cs
 
             }
         } else {
+
+            /** Check if the object has at least one element or whether the
+             * object's xml is empty.  This solves issues where a video is
+             * uploaded from another system and for some reason the metadata
+             * object isn't completely created/initialized - KALDEV-391
+             */
+            if (count($metadata_list_data) < 1 ||
+                empty($metadata_list_data->objects[0]->xml)) {
+
+                return false;
+            }
 
             // Parse the XML into a useable format
             $xml         = '<metadata>';
@@ -1830,7 +1852,7 @@ function update_video_custom_metadata($connection, $entry_id, $gshare = 'x', $cs
  * metadata->add action is required if adding metadata to the video.  A
  * KalturaMetadataListResponse is returned if the video has custom metadata.
  */
-function get_video_custom_metadata($connection, $metadata_profile_id, $entry_id) {
+function repository_kaltura_get_video_custom_metadata($connection, $metadata_profile_id, $entry_id) {
 
     $meta_filter = new KalturaMetadataFilter();
     $meta_filter->metadataObjectTypeEqual = KalturaMetadataObjectType::ENTRY;
@@ -1862,22 +1884,30 @@ function get_video_custom_metadata($connection, $metadata_profile_id, $entry_id)
  * second value is a comma separated list of course ids to share the video with
  * (2, 55, 44, 77, 8)
  */
-function format_video_custom_metadata($connection, $entry_id) {
+function repository_kaltura_format_video_custom_metadata($connection, $entry_id) {
 
     $site_share  = 0;
     $course_list = '';
 
     // Retrieve the custom metadata profile id from the repository configuration option
-    // This is a big performance gain as opposed to using @see get_metadata_profile()
-    $metadata_profile_id = get_config(PLUGIN_NAME, 'metadata_profile_id');
+    // This is a big performance gain as opposed to using @see repository_kaltura_get_metadata_profile()
+    $metadata_profile_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'metadata_profile_id');
 
     if (!$metadata_profile_id) {
         return array(0, '');
     }
 
-    $metadata_list_data = get_video_custom_metadata($connection, $metadata_profile_id, $entry_id);
+    $metadata_list_data = repository_kaltura_get_video_custom_metadata($connection, $metadata_profile_id, $entry_id);
 
-    if (!$metadata_list_data instanceof KalturaMetadataListResponse) {
+    /** Check if the object has at least one element or whether the
+     * object's xml is empty.  This solves issues where a video is
+     * uploaded from another system and for some reason the metadata
+     * object isn't completely created/initialized - KALDEV-391
+     */
+    if (!$metadata_list_data instanceof KalturaMetadataListResponse ||
+        count($metadata_list_data) < 1 ||
+        empty($metadata_list_data->objects[0]->xml)) {
+
         return array(0, '');
     }
 
@@ -1914,7 +1944,7 @@ function format_video_custom_metadata($connection, $entry_id) {
  * If the video catagoryids value contains the categoryid argument, then only a
  * course/video reference is added to the table.
  *
- * If the video categoryids value does not contain the categoryid arguement, the
+ * If the video categoryids value does not contain the categoryid argument, the
  * video categoryids property is updated to include the categoryid arguement;
  * and the video is udpated on the Kaltura server. The video is also removed
  * from the cache.  Lastly the course/video reference is added to the table.
@@ -1925,12 +1955,12 @@ function format_video_custom_metadata($connection, $entry_id) {
  *
  * @return - nothing useful
  */
-function add_video_course_reference($connection, $courseid, $video_ids = array()) {
+function repository_kaltura_add_video_course_reference($connection, $courseid, $video_ids = array()) {
     global $DB;
 
     try {
 
-        $root_path = get_config(PLUGIN_NAME, 'rootcategory');
+        $root_path = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'rootcategory');
 
         if (!$root_path) {
             add_to_log($courseid, 'repository_kaltura', 'view - root category', '', 'Error retrieving root category');
@@ -1952,7 +1982,7 @@ function add_video_course_reference($connection, $courseid, $video_ids = array()
 
                 if (!$result instanceof KalturaMediaEntry) {
                     add_to_log($courseid, 'repository_kaltura', 'view - retrieving video', '', 'Error retrieving - ' . $video_id);
-                    return '';
+                    continue;
                 }
 
                 // Check if the video belongs to the category
@@ -1999,22 +2029,64 @@ function add_video_course_reference($connection, $courseid, $video_ids = array()
  * @return - nothing
  *
  */
-function delete_category($course) {
+function repository_kaltura_delete_category($course) {
 
     global $DB;
 
     $kaltura = new kaltura_connection();
-    $connection = $kaltura->get_connection(true, 86400);
+    $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
-    $category = create_course_category($connection, $course->id);
+    if (!empty($connection)) {
+        $category = repository_kaltura_create_course_category($connection, $course->id);
 
-    if ($category) {
-        $param = array('courseid' => $course->id);
+        if ($category) {
+            $param = array('courseid' => $course->id);
 
-        if ($DB->delete_records('repo_kaltura_videos', $param)) {
+            if ($DB->delete_records('repo_kaltura_videos', $param)) {
 
-            $connection->category->delete($category->id);
-            add_to_log($course->id, 'repository_kaltura', 'Course category deleted', '', 'course id - ' . $course->id);
+                $connection->category->delete($category->id);
+                add_to_log($course->id, 'repository_kaltura', 'Course category deleted', '', 'course id - ' . $course->id);
+            }
         }
+    } else {
+        add_to_log($course->id, 'repository_kaltura', 'Course category not deleted', '', 'course id - ' . $course->id);
+    }
+}
+
+/**
+ * Check if the user's account has permissions to use custom
+ * metadatata
+ *
+ * @return bool - true if enabled, otherwise false
+ */
+function repository_kaltura_account_enabled_metadata($connection) {
+
+    $filter = new KalturaPermissionFilter();
+    $filter->nameEqual = 'METADATA_PLUGIN_PERMISSION';
+
+    $pager = new KalturaFilterPager();
+    $pager->pageSize = 30;
+    $pager->pageIndex = 1;
+
+    try {
+
+        if (empty($connection)) {
+            throw new Exception("Unable to connect");
+        }
+
+        $results = $connection->permission->listAction($filter, $pager);
+
+        if ( 0 == count($results->objects) ||
+            $results->objects[0]->status != KalturaPermissionStatus::ACTIVE) {
+
+            throw new Exception("partner doesn't have permission");
+
+        }
+
+        return true;
+
+    } catch (Exception $ex) {
+        add_to_log(SITEID, 'local_kaltura', ' | metadata no permissions ', '', $ex->getMessage());
+        return false;
     }
 }

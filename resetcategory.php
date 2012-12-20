@@ -33,24 +33,25 @@ require_capability('moodle/site:config',get_context_instance(CONTEXT_SYSTEM), $U
 
 $confirm = optional_param('confirm', 0, PARAM_INT);
 
-$url          = new moodle_url($CFG->wwwroot . '/repository/kaltura/resetcategory.php');
-$continue     = new moodle_url($CFG->wwwroot . '/repository/kaltura/resetcategory.php', array('confirm' => 1));
-$repo_setting = new moodle_url($CFG->wwwroot . '/admin/repository.php?action=edit&repos=kaltura');
+$sesskey = sesskey();
 
+$url          = new moodle_url($CFG->wwwroot . '/repository/kaltura/resetcategory.php');
+$continue     = new moodle_url($CFG->wwwroot . '/repository/kaltura/resetcategory.php', array('confirm' => 1, 'sesskey' => $sesskey));
+$repo_setting = new moodle_url($CFG->wwwroot . '/admin/repository.php', array('action' => 'edit', 'repos' => 'kaltura', 'sesskey' => $sesskey));
 
 $PAGE->set_url($url);
 $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
 $PAGE->set_title(get_string('resetroot', 'repository_kaltura'));
 $PAGE->set_heading(get_string('resetroot', 'repository_kaltura'));
 
+if ($confirm && confirm_sesskey()) {
 
-if ($confirm) {
     $param = array('plugin' => 'kaltura', 'name' => 'rootcategory');
     $DB->delete_records('config_plugins', $param);
-    
+
     $param = array('plugin' => 'kaltura', 'name' => 'rootcategory_id');
     $DB->delete_records('config_plugins', $param);
-    
+
     redirect($repo_setting, get_string('category_reset_complete', 'repository_kaltura'), 6);
     echo $OUTPUT->footer();
     die();
