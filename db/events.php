@@ -28,7 +28,7 @@
 $handlers = array (
     'course_deleted' => array (
         'handlerfile'      => '/repository/kaltura/locallib.php',
-        'handlerfunction'  => 'delete_category',
+        'handlerfunction'  => 'repository_kaltura_delete_category',
         'schedule'         => 'instant',
         'internal'         => 1,
     ),

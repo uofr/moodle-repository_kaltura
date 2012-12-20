@@ -23,9 +23,9 @@
 function xmldb_repository_kaltura_upgrade($oldversion = 0) {
 
     global $CFG, $DB;
-    
+
     $dbman = $DB->get_manager();
-    
+
     if ($oldversion < 2012061302) {
 
         // Define table repo_kaltura_videos to be created
@@ -50,7 +50,7 @@ function xmldb_repository_kaltura_upgrade($oldversion = 0) {
         // kaltura savepoint reached
         upgrade_plugin_savepoint(true, 2012061302, 'repository', 'kaltura');
     }
-    
+
     if ($oldversion < 2012061303) {
 
         // Define field timecreated to be added to repo_kaltura_videos
@@ -64,6 +64,31 @@ function xmldb_repository_kaltura_upgrade($oldversion = 0) {
 
         // kaltura savepoint reached
         upgrade_plugin_savepoint(true, 2012061303, 'repository', 'kaltura');
+    }
+
+    if ($oldversion < 2012112701) {
+
+        global $DB;
+
+        $type_id = $DB->get_field('repository', 'id', array('type' => 'kaltura'));
+
+
+        $role_id = $DB->get_field('role', 'id', array('shortname' => 'user'));
+
+        if (!empty($role_id)) {
+
+            $context = get_system_context();
+
+            assign_capability('repository/kaltura:view', CAP_ALLOW, $role_id, $context);
+            assign_capability('repository/kaltura:sharedvideovisibility', CAP_ALLOW, $role_id, $context);
+            assign_capability('repository/kaltura:systemvisibility', CAP_PREVENT, $role_id, $context);
+
+            $context->mark_dirty();
+        }
+
+        // kaltura savepoint reached
+        upgrade_plugin_savepoint(true, 2012112701, 'repository', 'kaltura');
+
     }
 
     return true;

@@ -23,13 +23,56 @@
 
 
 /**
- * This function prints the search form
+ * This function prints the search form for Moodle 2.3 and beyond installs.  The
+ * only difference between this function and (@see
+ * repository_kaltura_print_search_form()) is that this form does only uses one
+ * text box to search through video name and text.  And it does not give the
+ * user the option to filter searches via course name
+ *
+ * @param obj - objec 'id' = repo id, 'context'->'id' = context id
+ *
+ * @return HTML markup
+ */
+function repository_kaltura_print_new_search_form($data) {
+    $html = '';
+
+    // Hidden field repo instance id
+    $attributes = array('type'=>'hidden',
+                        'name' => 'repo_id',
+                        'value' => $data->id);
+    $html .= html_writer::empty_tag('input', $attributes);
+
+    // hidden field context id
+    $attributes['name'] = 'ctx_id';
+    $attributes['value'] = $data->context->id;
+    $html .= html_writer::empty_tag('input', $attributes);
+
+    // hidden field session key
+    $attributes['name'] = 'sesskey';
+    $attributes['value'] = sesskey();
+    $html .= html_writer::empty_tag('input', $attributes);
+
+    $title = get_string('search_name_tooltip', 'repository_kaltura');
+
+    // text field search name
+    $attributes['type'] = 'text';
+    $attributes['name'] = 's';
+    $attributes['value'] = '';
+    $attributes['title'] = $title;
+    $html .= html_writer::empty_tag('input', $attributes);
+
+    return $html;
+
+}
+
+/**
+ * This function prints the search form for pre Moodle 2.3 installs
  *
  * @param object - object 'id' = repo id, 'context'->'id' = context id
  *
  * @return HTML markup
  */
-function print_search_form($data) {
+function repository_kaltura_print_search_form($data) {
 
     $html = '';
 
@@ -105,18 +148,6 @@ function print_search_form($data) {
     $html .= html_writer::empty_tag('br');
     $html .= html_writer::empty_tag('br');
 
-    // label search own videos
-//    $param = array('for' => 'label_own_video_filter');
-//    $html .= html_writer::tag('label', get_string('own_videos_filter', 'repository_kaltura'), $param);
-//
-//    $html .= '&nbsp';
-
-    // checkbox search own videos
-//    $attributes['type'] = 'checkbox';
-//    $attributes['name'] = 'own';
-//    $attributes['value'] = 'search_own';
-//    $html .= html_writer::empty_tag('input', $attributes);
-
     return $html;
 }
 
@@ -124,10 +155,12 @@ function print_search_form($data) {
  * Prints required hidden element for users having the course video visibility
  * capability
  *
- * @param nothing
+ * @param bool - this needs to be set to false for Moodle versions 2.3 and
+ * beyond because of this bug: http://tracker.moodle.org/browse/MDL-35274
+ *
  * @return HTML markup
  */
-function print_used_selection() {
+function repository_kaltura_print_used_selection($enable_javascript = true) {
     $html = '';
 
     $param = array('for' => 'label_shared_or_used');
@@ -141,37 +174,37 @@ function print_used_selection() {
                      'own'          => get_string('search_own_upload', 'repository_kaltura')
                     );
 
-    $javascript_event = 'var share_select = document.getElementById("menushared_used");
-                         if (1 == share_select.selectedIndex) {
-                             document.getElementById("course_name_filter").disabled = true;
-                             document.getElementById("menucourse_with").disabled = true;
-                         } else {
-                             document.getElementById("course_name_filter").disabled = false;
-                             document.getElementById("menucourse_with").disabled = false;
-                         }
-                        ';
+    if ($enable_javascript) {
+        $javascript_event = 'var share_select = document.getElementById("menushared_used");
+                             if (1 == share_select.selectedIndex) {
+                                 document.getElementById("course_name_filter").disabled = true;
+                                 document.getElementById("menucourse_with").disabled = true;
+                             } else {
+                                 document.getElementById("course_name_filter").disabled = false;
+                                 document.getElementById("menucourse_with").disabled = false;
+                             }
+                            ';
+    } else {
+        $javascript_event = '';
+    }
 
-    $html .= html_writer::select($options, 'shared_used', 'used', false, array('onclick' => $javascript_event, 'title' => $title));
+
+    $html .= html_writer::select($options, 'shared_used', 'own', false, array('onclick' => $javascript_event, 'title' => $title));
 
     return $html;
 
-    // hidden flag for shared or used search
-//    $attributes = array('type'=>'hidden',
-//                        'name' => 'shared_used',
-//                        'value' => 'used');
-//    $html .= html_writer::empty_tag('input', $attributes);
-//
-//    return $html;
 }
 
 /**
  * Prints a drop down selection for users having both the course video
  * visibility and shared video visibility capabilities
  *
- * @param nothing
+ * @param bool - this needs to be set to false for Moodle versions 2.3 and
+ * beyond because of this bug: http://tracker.moodle.org/browse/MDL-35274
+ *
  * @return HTML markup
  */
-function print_shared_used_selection() {
+function repository_kaltura_print_shared_used_selection($enable_javascript = true) {
     $html = '';
 
     // label type of search
@@ -187,16 +220,22 @@ function print_shared_used_selection() {
                      'used'         => get_string('search_used', 'repository_kaltura'),
                      'own'          => get_string('search_own_upload', 'repository_kaltura')
                     );
-    $javascript_event = 'var share_select = document.getElementById("menushared_used");
-                         if (1 == share_select.selectedIndex || 3 == share_select.selectedIndex) {
-                             document.getElementById("course_name_filter").disabled = true;
-                             document.getElementById("menucourse_with").disabled = true;
-                         } else {
-                             document.getElementById("course_name_filter").disabled = false;
-                             document.getElementById("menucourse_with").disabled = false;
-                         }
-                        ';
-    $html .= html_writer::select($options, 'shared_used', 'used', false, array('onclick' => $javascript_event, 'title' => $title));
+
+    if ($enable_javascript) {
+        $javascript_event = 'var share_select = document.getElementById("menushared_used");
+                             if (1 == share_select.selectedIndex || 3 == share_select.selectedIndex) {
+                                 document.getElementById("course_name_filter").disabled = true;
+                                 document.getElementById("menucourse_with").disabled = true;
+                             } else {
+                                 document.getElementById("course_name_filter").disabled = false;
+                                 document.getElementById("menucourse_with").disabled = false;
+                             }
+                            ';
+    } else {
+        $javascript_event = '';
+    }
+
+    $html .= html_writer::select($options, 'shared_used', 'own', false, array('onclick' => $javascript_event, 'title' => $title));
 
     return $html;
 }
@@ -205,11 +244,12 @@ function print_shared_used_selection() {
  * Prints a drop down selection for users having the shared video visibility
  * capability
  *
- * @param nothing
+ * @param bool - this needs to be set to false for Moodle versions 2.3 and
+ * beyond because of this bug: http://tracker.moodle.org/browse/MDL-35274
  *
  * @return HTML markup
  */
-function print_shared_selection() {
+function repository_kaltura_print_shared_selection($enable_javascript = true) {
     $html = '';
 
     $param = array('for' => 'label_shared_or_used');
@@ -224,17 +264,47 @@ function print_shared_selection() {
                      'own'          => get_string('search_own_upload', 'repository_kaltura')
                     );
 
-    $javascript_event = 'var share_select = document.getElementById("menushared_used");
-                         if (1 == share_select.selectedIndex || 2 == share_select.selectedIndex) {
-                             document.getElementById("course_name_filter").disabled = true;
-                             document.getElementById("menucourse_with").disabled = true;
-                         } else {
-                             document.getElementById("course_name_filter").disabled = false;
-                             document.getElementById("menucourse_with").disabled = false;
-                         }
-                        ';
+    if ($enable_javascript) {
+        $javascript_event = 'var share_select = document.getElementById("menushared_used");
+                             if (1 == share_select.selectedIndex || 2 == share_select.selectedIndex) {
+                                 document.getElementById("course_name_filter").disabled = true;
+                                 document.getElementById("menucourse_with").disabled = true;
+                             } else {
+                                 document.getElementById("course_name_filter").disabled = false;
+                                 document.getElementById("menucourse_with").disabled = false;
+                             }
+                            ';
+    } else {
+        $javascript_event = '';
+    }
 
-    $html .= html_writer::select($options, 'shared_used', 'used', false, array('onclick' => $javascript_event, 'title' => $title));
+
+    $html .= html_writer::select($options, 'shared_used', 'own', false, array('onclick' => $javascript_event, 'title' => $title));
 
     return $html;
+}
+
+/**
+ * This function prints javascript used to hide and unhide the search form for
+ * Moodle version 2.3 and above
+ */
+function repository_kaltura_print_search_form_javascript() {
+    $javascript_event = '
+    // Change the style of the file picker search bar to resolve MDL-35233
+    var search_bar = document.getElementById("kal_repo_search").parentNode.parentNode;
+
+    if (search_bar.style.display != "table-row") {
+        search_bar.style.display = "table-row";
+    }
+
+    var search_form = document.getElementById("kal_repo_search")
+    if (search_form) {
+        if ("none" == search_form.style.display) {
+            search_form.style.display = "block";
+        } else {
+            search_form.style.display = "none";
+        }
+    };';
+
+    return $javascript_event;
 }
