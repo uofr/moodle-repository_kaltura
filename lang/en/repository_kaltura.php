@@ -34,6 +34,12 @@ $string['fifteen'] = '15';
 $string['twenty'] = '20';
 $string['twentyfive'] = '25';
 $string['thirty'] = '30';
+$string['fifty'] = '50';
+$string['onehundred'] = '100';
+$string['twohundred'] = '200';
+$string['threehundred'] = '300';
+$string['fourhundred'] = '400';
+$string['fivehundred'] = '500';
 $string['connection_status'] = 'Connection Status';
 $string['connected'] = 'Connection to Kaltura successful';
 $string['not_connected'] = 'Connection to Kaltura failed';
@@ -41,7 +47,7 @@ $string['using_metadata_profile'] = 'Metadata Profile';
 $string['metadata_profile_found'] = 'User Metadata %a';
 $string['metadata_profile_not_found'] = 'No Metadata profile found';
 $string['metadata_profile_error'] = 'Error creating metadata profile';
-$string['metadata_profile_info'] = '{$a->profilename} (Profile Id: {$a->profileid} | Created: {$a->created}';
+$string['metadata_profile_info'] = '{$a->profilename} (Profile Id: {$a->profileid} | Created: {$a->created})';
 $string['rootcategory'] = 'Root category path';
 $string['rootcategory_help'] = '<p>Set the root category path to create a category/sub-category structure, in the KMC, to organize all of the Moodle course categories.  '.
                                'For example: <b>Sites>My Moodle Site</b>, will create a KMC category called "Sites" and a sub category called "My Moodle Site".  '.
@@ -55,6 +61,8 @@ $string['confirm_category_reset'] = '<p>Are you user you want to reset the root 
                                     '<p>If you accidentially click "continue", it is possible to get your information back, but only if you set the category path back to the <b>original</b> value.</p>'.
                                     '<p>Choose wisely.</p>';
 $string['category_reset_complete'] = '<b>Root category has been reset</b>';
+$string['no_permission_metadata'] = 'In order to use the Kaltura repository plug-in your account must have custom metadata enabled.  Please consult with your Kaltura rep.';
+$string['no_permission_metadata_error'] = 'Error';
 
 // File Picker Strings
 $string['keyword'] = 'Search';
@@ -67,7 +75,7 @@ $string['kaltura:systemvisibility'] = 'Course Video Visibility';
 $string['kaltura:sharedvideovisibility'] = 'Shared Video Visibility';
 
 // Search UI
-$string['search_name'] = 'Media name';
+$string['search_name_tooltip'] = 'Type in media name or tag and press enter';
 $string['search_tags'] = 'Media tags';
 $string['search_site'] = 'Vidoes shared with site';
 $string['search_site'] = 'Videos shared with course(s)';
