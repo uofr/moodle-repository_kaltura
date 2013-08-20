@@ -1,16 +1,16 @@
 <?php
 
-$string['modulenameplural'] = 'Kaltura Video Resource';
-$string['modulename'] = 'Kaltura Video Resource';
-$string['modulename_help'] = 'The Kaltura Video Resource enables a teacher to create a resource using a Kaltura video.';
-$string['pluginadministration'] = 'Kaltura Video Resource';
-$string['pluginname'] = 'Kaltura Video Resource';
+$string['modulenameplural'] = 'Media (Kaltura)';
+$string['modulename'] = 'Media (Kaltura)';
+$string['modulename_help'] = 'Add media to your course by uploading video, audio, images, or make a recording from your webcam. Content is stored on the <a href="http://kaltura.cc.uregina.ca">kaltura.cc.uregina.ca</a> instance.';
+$string['pluginadministration'] = 'Media (Kaltura)';
+$string['pluginname'] = 'Media (Kaltura)';
 $string['name'] = 'Name';
 $string['video_hdr'] = 'Video';
 $string['add_video'] = 'Add Media';
 $string['video_properties'] = 'Player properties';
 $string['upload_successful'] = 'Upload Successful';
-$string['video_converting'] = 'Your video is still converting.  Please check the status of your video at a later time.';
+$string['video_converting'] = 'Your media is still converting. Please check the status of your video at a later time.';
 $string['vid_prop_name'] = 'Name:';
 $string['vid_prop_player'] = 'Player design:';
 $string['vid_prop_dimensions'] = 'Player dimensions:';
@@ -26,12 +26,13 @@ $string['video_preview_header'] = 'Preview';
 $string['invalidid'] = 'Invalid ID';
 $string['replace_video'] = 'Replace video';
 $string['custom_player'] = 'Custom player';
-$string['kalvidres:addinstance'] = 'Add a Kaltura Video Resource';
+$string['kalvidres:addinstance'] = 'Add Media (Kaltura)';
 $string['use_screen_recorder'] = 'Record screen';
 $string['use_kcw'] = 'Upload media or record from webcam';
 $string['media_method'] = 'Media type';
 $string['media_creation'] = 'Media Type';
-$string['media_creation_help'] = 'Select the method of media you would like to add.  <b>Record Screen</b> will open a screen recording widget, where you can record the actions you make on your desktop.  <b>Upload Media</b> will open the Kaltura Content Wizard where you can upload media from your computer or select previously uploaded media.';
+//$string['media_creation_help'] = 'Select the method of media you would like to add.  <b>Record Screen</b> will open a screen recording widget, where you can record the actions you make on your desktop.  <b>Upload Media</b> will open the Kaltura Content Wizard where you can upload media from your computer or select previously uploaded media.';
+$string['media_creation_help'] = '<b>Upload Media</b> will open the Kaltura Contribution Wizard where you can upload video, audio, and images from your computer, select from previously uploaded media, or record from your webcam.';
 $string['scr_loading'] = 'Loading...';
 $string['kalvidres:screenrecorder'] = 'Screen recorder';
 $string['javanotenabled'] = 'Browser Java is disabled.  Please enable Java and refresh the page to use the screen recorder.';
