@@ -53,7 +53,7 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
         $entry_obj = local_kaltura_get_ready_entry_object($kalvidres->entry_id);
 
         if (!empty($entry_obj)) {
-
+            
             // Check if player selection is globally overridden
             if (local_kaltura_get_player_override()) {
                 $new_player = local_kaltura_get_player_uiconf('player_resource');
@@ -71,16 +71,32 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
             // Determine if the mobile theme is being used
             $theme = get_selected_theme_for_device_type();
 
-            if (0 == strcmp($theme, 'mymobile')) {
-
-                $markup = local_kaltura_get_kwidget_code($entry_obj, $kalvidres->uiconf_id, $courseid, $session);
+            if ($entry_obj->mediaType ==2) {
+                
+                $markup = html_writer::tag('img', '', array('src'=>'http://kaltura.cc.uregina.ca/p/106/sp/10600/raw/entry_id/'.$entry_obj->id.'/version/100000'));
+                
+            } else if ($entry_obj->mediaType == 5) {
+                // mediaType 5 = audio?
+                //die(print_r($entry_obj,1));
+                
+                //$audio_link = html_writer::tag('a','Link text',array('href'=>'http://kaltura.cc.uregina.ca/p/106/sp/10600/playManifest/entryId/'.$entry_obj->id.'/format/url/flavorParamId/0/audio.mp3'));
+                //$mediarenderer = $PAGE->get_renderer('core', 'media');
+                //$markup = $mediarenderer->embed_url(new moodle_url('http://kaltura.cc.uregina.ca/p/106/sp/10600/playManifest/entryId/'.$entry_obj->id.'/format/url/flavorParamId/0/audio.mp3'),null,null,null,array(core_media::OPTION_BLOCK=>1));
+                
+                $markup = local_kaltura_get_kdp_code($entry_obj, KALTURA_PLAYER_PLAYERAUDIO, $courseid, $session);
+                    
+            
             } else {
-                $markup = local_kaltura_get_kdp_code($entry_obj, $kalvidres->uiconf_id, $courseid, $session);
+                if (0 == strcmp($theme, 'mymobile') || 0 == strcmp($theme, 'urmobile')) {
+                    $markup = local_kaltura_get_kwidget_code($entry_obj, $kalvidres->uiconf_id, $courseid, $session);
+                } else {
+                    $markup = local_kaltura_get_kdp_code($entry_obj, $kalvidres->uiconf_id, $courseid, $session);
+                }
             }
-
-            $output .= html_writer::start_tag('center');
-            $output .= html_writer::tag('div', $markup);
-            $output .= html_writer::end_tag('center');
+            
+            //$output .= html_writer::start_tag('center');
+            $output .= html_writer::tag('div', $markup, array('style'=>'text-align: center'));
+            //$output .= html_writer::end_tag('center');
         } else {
             $output = get_string('video_converting', 'kalvidres');
         }
