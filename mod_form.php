@@ -59,8 +59,10 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         if ($connection) {
 
             $PAGE->requires->js($url, true);
-//            $PAGE->requires->js('/local/kaltura/js/screenrecorder.js', true);
-    
+            if (get_config(KALTURA_PLUGIN_NAME, 'enable_screen_recorder')) {
+                $PAGE->requires->js('/local/kaltura/js/screenrecorder.js', true);
+            }
+                
             $PAGE->requires->js('/local/kaltura/js/jquery.js', true);
             $PAGE->requires->js('/local/kaltura/js/swfobject.js', true);
             $PAGE->requires->js('/local/kaltura/js/kcwcallback.js', true);
