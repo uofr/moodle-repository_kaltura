@@ -21,9 +21,9 @@
  */
 
 // Required strings
-$string['pluginname'] = 'Kaltura';
-$string['configplugin'] = 'Kaltura Configuration';
-$string['pluginname_help'] = 'A Kaltura Repository';
+$string['pluginname'] = 'Kaltura CE';
+$string['configplugin'] = 'Kaltura CE Configuration';
+$string['pluginname_help'] = 'A Kaltura CE Repository';
 
 // Settings page strings
 $string['itemsperpage'] = 'Files to display on a page';
@@ -61,7 +61,7 @@ $string['confirm_category_reset'] = '<p>Are you sure you want to reset the root 
                                     '<p>If you accidentially click "continue", it is possible to get your information back, but only if you set the category path back to the <b>original</b> value.</p>'.
                                     '<p>Choose wisely.</p>';
 $string['category_reset_complete'] = '<b>Root category has been reset</b>';
-$string['no_permission_metadata'] = 'In order to use the Kaltura repository plug-in your account must have custom metadata enabled.  Please consult with your Kaltura rep.';
+$string['no_permission_metadata'] = 'In order to use the Kaltura CE repository plug-in your account must have custom metadata enabled.  Please consult with IT.Support@uregina.ca.';
 $string['no_permission_metadata_error'] = 'Error';
 
 // File Picker Strings
