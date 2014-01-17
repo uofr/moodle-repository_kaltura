@@ -1,10 +1,10 @@
 <?php
 
-$string['modulenameplural'] = 'Media (Kaltura)';
-$string['modulename'] = 'Media (Kaltura)';
+$string['modulenameplural'] = 'Media (Kaltura CE)';
+$string['modulename'] = 'Media (Kaltura CE)';
 $string['modulename_help'] = 'Add media to your course by uploading video, audio, images, or make a recording from your webcam. Content is stored on the <a href="http://kaltura.cc.uregina.ca">kaltura.cc.uregina.ca</a> instance.';
-$string['pluginadministration'] = 'Media (Kaltura)';
-$string['pluginname'] = 'Media (Kaltura)';
+$string['pluginadministration'] = 'Media (Kaltura CE)';
+$string['pluginname'] = 'Media (Kaltura CE)';
 $string['name'] = 'Name';
 $string['video_hdr'] = 'Video';
 $string['add_video'] = 'Add Media';
@@ -26,7 +26,7 @@ $string['video_preview_header'] = 'Preview';
 $string['invalidid'] = 'Invalid ID';
 $string['replace_video'] = 'Replace video';
 $string['custom_player'] = 'Custom player';
-$string['kalvidres:addinstance'] = 'Add Media (Kaltura)';
+$string['kalvidres:addinstance'] = 'Add Media (Kaltura CE)';
 $string['use_screen_recorder'] = 'Record screen';
 $string['use_kcw'] = 'Upload media or record from webcam';
 $string['media_method'] = 'Media type';
