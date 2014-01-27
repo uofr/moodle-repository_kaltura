@@ -73,15 +73,15 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
 
             if ($entry_obj->mediaType ==2) {
                 
-                $markup = html_writer::tag('img', '', array('src'=>'http://kaltura.cc.uregina.ca/p/106/sp/10600/raw/entry_id/'.$entry_obj->id.'/version/100000'));
+                $markup = html_writer::tag('img', '', array('src'=>'https://kaltura.cc.uregina.ca/p/106/sp/10600/raw/entry_id/'.$entry_obj->id.'/version/100000'));
                 
             } else if ($entry_obj->mediaType == 5) {
                 // mediaType 5 = audio?
                 //die(print_r($entry_obj,1));
                 
-                //$audio_link = html_writer::tag('a','Link text',array('href'=>'http://kaltura.cc.uregina.ca/p/106/sp/10600/playManifest/entryId/'.$entry_obj->id.'/format/url/flavorParamId/0/audio.mp3'));
+                //$audio_link = html_writer::tag('a','Link text',array('href'=>'https://kaltura.cc.uregina.ca/p/106/sp/10600/playManifest/entryId/'.$entry_obj->id.'/format/url/flavorParamId/0/audio.mp3'));
                 //$mediarenderer = $PAGE->get_renderer('core', 'media');
-                //$markup = $mediarenderer->embed_url(new moodle_url('http://kaltura.cc.uregina.ca/p/106/sp/10600/playManifest/entryId/'.$entry_obj->id.'/format/url/flavorParamId/0/audio.mp3'),null,null,null,array(core_media::OPTION_BLOCK=>1));
+                //$markup = $mediarenderer->embed_url(new moodle_url('https://kaltura.cc.uregina.ca/p/106/sp/10600/playManifest/entryId/'.$entry_obj->id.'/format/url/flavorParamId/0/audio.mp3'),null,null,null,array(core_media::OPTION_BLOCK=>1));
                 
                 $markup = local_kaltura_get_kdp_code($entry_obj, KALTURA_PLAYER_PLAYERAUDIO, $courseid, $session);
                     
