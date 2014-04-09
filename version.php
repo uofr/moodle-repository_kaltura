@@ -23,10 +23,10 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
 }
 
-$plugin->version = 2013041507;
+$plugin->version = 2013071807;
 $plugin->component  = 'repository_kaltura';
-$plugin->release    = 'Kaltura release 3.0.99 (RL: 2.4.1.6)';
-$plugin->requires = 2012120300;
+$plugin->release    = 'Kaltura release 3.1.01 (RL: 2.5.1.6)';
+$plugin->requires = 2013051400;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = array(
     'local_kaltura' => 2013041500
