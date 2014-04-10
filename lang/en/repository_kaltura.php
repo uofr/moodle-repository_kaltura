@@ -98,8 +98,11 @@ $string['folder_used_videos'] = 'Media used in courses';
 $string['folder_used_videos_shortname'] = 'Used Media';
 $string['folder_site_shared_videos'] = 'Media shared with site';
 $string['folder_site_shared_videos_shortname'] = 'Site Shared Media';
+$string['folder_mymedia_videos'] = 'Media you own';
+$string['folder_mymedia_videos_shortname'] = 'My Media';
 
 $string['crumb_home'] = 'Home';
 $string['crumb_shared'] = 'Shared with courses';
 $string['crumb_used'] = 'Used in courses';
 $string['crumb_site_shared'] = 'Shared with site';
+$string['crumb_mymedia'] = 'My Media';
