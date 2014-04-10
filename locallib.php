@@ -43,6 +43,9 @@ define('REPOSITORY_KALTURA_USED_PATH', '/used');
 define('REPOSITORY_KALTURA_SITE_SHARED_PATH', '/siteshare');
 
 
+define('REPOSITORY_KALTURA_MYMEDIA_PATH', '/own');
+
+
 /**
  * Get metadata profile information
  *
@@ -588,11 +591,12 @@ function repository_kaltura_get_course_access_list($capability = '') {
                 }
             }
 
-        } else {
+        }// else {
             // This means that the role at the system level was set to prevent.  However, we know
             // the user has this capability otherwise this function would not have been called.  So we enter the
             // worst case scenario. Get the course(s) in the context of this role assignment.  Mark each course for a has_capability check.
-
+            //prevent worst case scenario
+            /*
             foreach ($roles_array as $roleid) {
 
                 $courses = repository_kaltura_get_all_courses_in_context($role_assign_context_id);
@@ -611,9 +615,9 @@ function repository_kaltura_get_course_access_list($capability = '') {
                 if (!has_capability($capability, $course_context)) {
                     unset($final_courses[$id]);
                 }
-            }
-
-        }
+            }*/
+            // end prevent
+        //}
     }
 
     // Remove the site course id
@@ -979,18 +983,22 @@ function repository_kaltura_get_system_shared_listing($ret, $path, $system_acces
     if (empty($path)) {
 
         $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
-
-        $name       = get_string('folder_site_shared_videos', 'repository_kaltura');
-        $short_name = get_string('folder_site_shared_videos_shortname', 'repository_kaltura');
-        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SITE_SHARED_PATH);
-
+        
+        $name       = get_string('folder_mymedia_videos', 'repository_kaltura');
+        $short_name = get_string('folder_mymedia_videos_shortname', 'repository_kaltura');
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_MYMEDIA_PATH);
+        
+        $name       = get_string('folder_used_videos', 'repository_kaltura');
+        $short_name = get_string('folder_used_videos_shortname', 'repository_kaltura');
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_USED_PATH);
+        
         $name       = get_string('folder_shared_videos', 'repository_kaltura');
         $short_name = get_string('folder_shared_videos_shortname', 'repository_kaltura');
         $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SHARED_PATH);
 
-        $name       = get_string('folder_used_videos', 'repository_kaltura');
-        $short_name = get_string('folder_used_videos_shortname', 'repository_kaltura');
-        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_USED_PATH);
+        $name       = get_string('folder_site_shared_videos', 'repository_kaltura');
+        $short_name = get_string('folder_site_shared_videos_shortname', 'repository_kaltura');
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SITE_SHARED_PATH);
 
         $ret['path'] = $newpath;
         $ret['list'] = $listing;
@@ -1131,7 +1139,7 @@ function repository_kaltura_get_site_video_listing($path, $type_path, $page) {
  */
 function repository_kaltura_get_course_video_listing($courses, $path, $type_path = REPOSITORY_KALTURA_SHARED_PATH, $page = 1) {
 
-    global $DB;
+    global $DB,$USER,$SESSION;
 
     $newpath     = array();
     $listing     = array();
@@ -1159,6 +1167,11 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
         $sub_crumb = get_string('crumb_used', 'repository_kaltura');
         $type = 'used';
 
+    } else if (0 == strcmp(REPOSITORY_KALTURA_MYMEDIA_PATH, $type_path)) {
+
+        $sub_crumb = get_string('crumb_mymedia', 'repository_kaltura');
+        $type = 'own';
+
     } else {
 
         return $ret;
@@ -1167,7 +1180,7 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
     $page_size = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'itemsperpage');
 
     // If there is only one '/' in the path then we are looking at course folders
-    if (1 == substr_count($path, '/')) {
+    if (1 == substr_count($path, '/') && $path != '/own') {
 
         $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
         $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
@@ -1178,30 +1191,48 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
         $ret['list'] = $listing;
 
     } else {
-
-        // If they are deeper than the root of the course folder then determine the course
-        // and display the videos for the course
+        
         $kaltura    = new kaltura_connection();
         $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
+            
+        if ($path != '/own') {
+            // If they are deeper than the root of the course folder, then determine the course
+            // and display the videos for the course
 
-        // Build navigation path
-        $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
-        $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
+            // Build navigation path
+            $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
+            $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
 
-        $full_path = explode('/', $path);
-        $course_shortname = end($full_path);
+            $full_path = explode('/', $path);
+            $course_shortname = end($full_path);
 
-        $newpath[] = array('name' => $course_shortname, 'path' => $type_path. '/' . $course_shortname);
+            $newpath[] = array('name' => $course_shortname, 'path' => $type_path. '/' . $course_shortname);
 
-        // Get videos shared in course
-        $param = array('shortname' => $course_shortname);
-        $course = $DB->get_record('course', $param);
+            // Get videos shared in course
+            $param = array('shortname' => $course_shortname);
+            $course = $DB->get_record('course', $param);
 
-        $course = array($course->id => $course);
+            $course = array($course->id => $course);
 
-        $search_results = repository_kaltura_search_videos($connection, '', '',
-                                        $course, $page,
-                                        $type);
+            $search_results = repository_kaltura_search_videos($connection, '', '',
+                                            $course, $page,
+                                            $type);
+        
+        
+        } else {
+            
+            $sub_crumb = get_string('crumb_mymedia', 'repository_kaltura');
+            $type_path = '/own';
+            
+            // Build navigation path
+            $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
+            $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
+            
+            $search_name = '';
+            
+                                      
+            $search_results = repository_kaltura_search_own_videos($connection, $search_name, $search_name, $page);                      
+        }
 
         $uri        = local_kaltura_get_host();
         $partner_id = local_kaltura_get_partner_id();
