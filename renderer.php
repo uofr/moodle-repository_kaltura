@@ -33,19 +33,21 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
 
         $output = '';
 
-        $attr = array('for' => 'video_name');
-//        $output .= html_writer::tag('label', get_string('vid_prop_name', 'kalvidres'), $attr);
-//        $output .= '&nbsp;';
+        //$attr = array('for' => 'video_name');
+        //$output .= html_writer::tag('label', get_string('vid_prop_name', 'kalvidres'), $attr);
+        $attr = array('class'=>'kalvidres_video_title');
+        $output .= html_writer::tag('div', $title, $attr);
+        //$output .= '&nbsp;';
 
-        $output .= html_writer::start_tag('b');
-        $output .= html_writer::tag('div', $title);
-        $output .= html_writer::end_tag('b');
-        $output .= html_writer::empty_tag('br');
+        //$output .= html_writer::start_tag('b');
+        //$output .= html_writer::tag('div', $title);
+        //$output .= html_writer::end_tag('b');
+        //$output .= html_writer::empty_tag('br');
 
 
         return $output;
     }
-
+    
     function embed_video($kalvidres) {
         global $PAGE;
 
@@ -95,7 +97,7 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
             }
             
             //$output .= html_writer::start_tag('center');
-            $output .= html_writer::tag('div', $markup, array('style'=>'text-align: center'));
+            $output .= html_writer::tag('div', $markup, array('style'=>'text-align: center','class'=>'flex-video'));
             //$output .= html_writer::end_tag('center');
         } else {
             $output = get_string('video_converting', 'kalvidres');

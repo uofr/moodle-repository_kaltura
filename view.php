@@ -80,13 +80,15 @@ echo $OUTPUT->header();
 
 $renderer = $PAGE->get_renderer('mod_kalvidres');
 
-echo $OUTPUT->box_start('generalbox');
+echo html_writer::start_tag('h2');
+echo $renderer->display_mod_info($kalvidres->name);
+echo html_writer::end_tag('h2');
 
-echo $renderer->display_mod_info($kalvidres->video_title);
-
-echo format_module_intro('kalvidres', $kalvidres, $cm->id);
-
-echo $OUTPUT->box_end();
+if (!empty($kalvidres->intro)) {
+    echo $OUTPUT->box_start('generalbox boxaligncenter','intro');
+    echo format_module_intro('kalvidres', $kalvidres, $cm->id);
+    echo $OUTPUT->box_end();
+}
 
 if ($connection) {
 

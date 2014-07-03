@@ -218,7 +218,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $videogroup = array();
         $videogroup[] =& $mform->createElement('button', 'add_video', get_string('add_video', 'kalvidres'));
-        $videogroup[] =& $mform->createElement('button', 'video_properties', get_string('video_properties', 'kalvidres'), $prop);
+        //$videogroup[] =& $mform->createElement('button', 'video_properties', get_string('video_properties', 'kalvidres'), $prop);
         $videogroup[] =& $mform->createElement('button', 'video_preview', get_string('vide_preview', 'kalvidres'), $prop);
 
         $mform->addGroup($videogroup, 'video_group', '&nbsp;', '&nbsp;', false);
@@ -242,7 +242,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $output .= html_writer::end_tag('div');
 
         // Panel markup to set video properties
-        $attr = array('id' => 'video_properties_panel');
+        /*$attr = array('id' => 'video_properties_panel');
         $output .=  html_writer::start_tag('div', $attr);
 
         $attr = array('class' => 'hd');
@@ -255,7 +255,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $output .= html_writer::tag('div', $properties_markup, $attr);
 
         $output .= html_writer::end_tag('div');
-
+        */
         // Panel markup to preview video
         $attr = array('id' => 'video_preview_panel');
         $output .=  html_writer::start_tag('div', $attr);
@@ -389,30 +389,30 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         // Display name input box
         $attr = array('for' => 'vid_prop_name');
-        $output .= html_writer::tag('label', get_string('vid_prop_name', 'kalvidres'), $attr);
-        $output .= '&nbsp;';
+        //$output .= html_writer::tag('label', get_string('vid_prop_name', 'kalvidres'), $attr);
+        //$output .= '&nbsp;';
 
         $attr = array('type' => 'text',
                       'id' => 'vid_prop_name',
                       'name' => 'vid_prop_name',
                       'value' => '',
                       'maxlength' => '100');
-        $output .= html_writer::empty_tag('input', $attr);
-        $output .= html_writer::empty_tag('br');
-        $output .= html_writer::empty_tag('br');
+        //$output .= html_writer::empty_tag('input', $attr);
+        //$output .= html_writer::empty_tag('br');
+        //$output .= html_writer::empty_tag('br');
 
         // Display section element for player design
         $attr = array('for' => 'vid_prop_player');
-        $output .= html_writer::tag('label', get_string('vid_prop_player', 'kalvidres'), $attr);
-        $output .= '&nbsp;';
+        //$output .= html_writer::tag('label', get_string('vid_prop_player', 'kalvidres'), $attr);
+        //$output .= '&nbsp;';
 
         list($options, $default_option) = $this->get_video_resource_players();
 
         $attr = array('id' => 'vid_prop_player');
 
-        $output .= html_writer::select($options, 'vid_prop_player', $default_option, false, $attr);
-        $output .= html_writer::empty_tag('br');
-        $output .= html_writer::empty_tag('br');
+        //$output .= html_writer::select($options, 'vid_prop_player', $default_option, false, $attr);
+        //$output .= html_writer::empty_tag('br');
+        //$output .= html_writer::empty_tag('br');
 
         // Display player dimensions radio buttons
         $attr = array('for' => 'vid_prop_dimensions');
@@ -427,13 +427,13 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $selected = !empty($defaults) ? $defaults['vid_prop_dimensions'] : array();
         $output .= html_writer::select($options, 'vid_prop_dimensions', $selected, array(), $attr);
 
-        $output .= html_writer::empty_tag('br');
-        $output .= html_writer::empty_tag('br');
+        //$output .= html_writer::empty_tag('br');
+        //$output .= html_writer::empty_tag('br');
 
         // Display player size drop down button
         $attr = array('for' => 'vid_prop_size');
-        $output .= html_writer::tag('label', get_string('vid_prop_size', 'kalvidres'), $attr);
-        $output .= '&nbsp;';
+        //$output .= html_writer::tag('label', get_string('vid_prop_size', 'kalvidres'), $attr);
+        //$output .= '&nbsp;';
 
         $options = array(0 => get_string('vid_prop_size_large', 'kalvidres'),
                          1 => get_string('vid_prop_size_small', 'kalvidres'),
@@ -443,10 +443,10 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $attr = array('id' => 'vid_prop_size');
         $selected = !empty($defaults) ? $defaults['vid_prop_size'] : array();
 
-        $output .= html_writer::select($options, 'vid_prop_size', $selected, array(), $attr);
+        //$output .= html_writer::select($options, 'vid_prop_size', $selected, array(), $attr);
 
         // Display custom player size
-        $output .= '&nbsp;&nbsp;';
+        //$output .= '&nbsp;&nbsp;';
 
         $attr = array('type' => 'text',
                       'id' => 'vid_prop_width',
@@ -455,9 +455,9 @@ class mod_kalvidres_mod_form extends moodleform_mod {
                       'maxlength' => '3',
                       'size' => '3',
                       );
-        $output .= html_writer::empty_tag('input', $attr);
+        //$output .= html_writer::empty_tag('input', $attr);
 
-        $output .= '&nbsp;x&nbsp;';
+        //$output .= '&nbsp;x&nbsp;';
 
         $attr = array('type' => 'text',
                       'id' => 'vid_prop_height',
@@ -466,7 +466,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
                       'maxlength' => '3',
                       'size' => '3',
                       );
-        $output .= html_writer::empty_tag('input', $attr);
+        //$output .= html_writer::empty_tag('input', $attr);
 
         return $output;
     }
