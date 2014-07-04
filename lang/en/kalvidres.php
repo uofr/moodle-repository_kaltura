@@ -2,7 +2,7 @@
 
 $string['modulenameplural'] = 'Media';
 $string['modulename'] = 'Media';
-$string['modulename_help'] = 'Add media to your course by uploading video or make a recording from your webcam. Content is stored locally on the institution\'s Kaltura CE (<a href="https://kaltura.cc.uregina.ca">kaltura.cc.uregina.ca</a>) server.';
+$string['modulename_help'] = 'Add media to your course by uploading video or make a recording directly from your webcam. Content is stored locally on the institution\'s Kaltura CE (<a href="https://kaltura.cc.uregina.ca">kaltura.cc.uregina.ca</a>) server.';
 $string['pluginadministration'] = 'Media (Kaltura CE)';
 $string['pluginname'] = 'Media (Kaltura CE)';
 $string['name'] = 'Name';
