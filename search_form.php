@@ -289,7 +289,7 @@ function repository_kaltura_print_shared_selection($enable_javascript = true) {
  * Moodle version 2.3 and above
  */
 function repository_kaltura_print_search_form_javascript() {
-    $javascript_event = '
+    $javascript_event = '';/*
     // Change the style of the file picker search bar to resolve MDL-35233
     var search_bar = document.getElementById("kal_repo_search").parentNode.parentNode;
 
@@ -305,6 +305,6 @@ function repository_kaltura_print_search_form_javascript() {
             search_form.style.display = "none";
         }
     };';
-
+*/
     return $javascript_event;
 }

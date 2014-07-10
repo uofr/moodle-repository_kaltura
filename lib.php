@@ -1048,16 +1048,16 @@ if ($version) {
 
             // Print container tag
             $param = array('id' => 'kal_repo_search',
-                           'style' => 'display:none;white-space: nowrap;');
+                           'style' => 'white-space: nowrap;');
 
             $str = html_writer::tag('div', $str, $param);
-
+            /*
             // Print search link
             $param = array('href' => '#',
                            'onclick' => repository_kaltura_print_search_form_javascript());
             $search_text_link = get_string('keyword', 'repository_kaltura');
             $str = html_writer::tag('a', $search_text_link, $param) . '<br />' . $str;
-
+            */
             return $str;
         }
 
