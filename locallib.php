@@ -645,6 +645,7 @@ function repository_kaltura_get_all_courses_in_context($context_id) {
     switch($context->contextlevel) {
         case CONTEXT_SYSTEM:
         case CONTEXT_COURSECAT:
+        /*
             // Retrieve all courses under the current category
             $sql_like = $DB->sql_like('ctx.path', ':path');
             $params = array('path' => $context->path. '%');
@@ -656,7 +657,21 @@ function repository_kaltura_get_all_courses_in_context($context_id) {
                    "   AND {$sql_like}";
 
             $records = $DB->get_records_sql($sql, $params);
-
+        */
+            
+        /**
+        * HACK UR - Instead of listing all courses, just list those courses the user has access to
+        **/
+            
+            $records = enrol_get_my_courses();
+            $site = get_site();
+        
+            if (array_key_exists($site->id,$records)) {
+                unset($records[$site->id]);
+            }
+            
+            
+            
             if (empty($records)) {
                 $records = array();
             }
@@ -676,13 +691,22 @@ function repository_kaltura_get_all_courses_in_context($context_id) {
             break;
     }
 
-
+    /*
     foreach ($records as $context_id => $data) {
         $rec = new stdClass();
         $rec->id = $data->instanceid;
         $rec->visible = $data->visible;
 
         $result[$data->instanceid] = $rec;
+    }
+    */
+    
+    foreach ($records as $id => $data) {
+        $rec = new stdClass();
+        $rec->id = $data->id;
+        $rec->visible = $data->visible;
+
+        $result[$data->id] = $rec;
     }
 
     return $result;
