@@ -907,14 +907,17 @@ function repository_kaltura_format_data($video_data, $uri, $partner_id, $uiconf_
 
         $results[] = array('title' => $name,
                            'shorttitle' => $video->name,
-                           'date' => userdate($video->updatedAt),
+                           'date' => $video->updatedAt,//userdate($video->updatedAt),
                            'thumbnail' => $video->thumbnailUrl,
                            'thumbnail_width' => 150,
                            'thumbnail_height' => 70,
                            'source' =>  $source,
+                           //'size' => $video->duration,
                            'hasauthor' => true,
                            //'url' => '',
-                           'haslicense' => true
+                           'haslicense' => true,
+                           'license' => 'Unknown',//$video->licenseType,
+                           'author' => $video->userId
                             );
 
     }
@@ -1243,10 +1246,7 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
 
             $course = array($course->id => $course);
 
-            $search_results = repository_kaltura_search_videos($connection, '', '',
-                                            $course, $page,
-                                            $type);
-        
+            $search_results = repository_kaltura_search_videos($connection, '', '', $course, $page, $type);
         
         } else {
             
