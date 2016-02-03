@@ -111,8 +111,10 @@ if ($version) {
 
             } catch (Exception $exp) {
                 //$courseid = get_courseid_from_context($PAGE->context);
-                $coursecontext = $context->get_course_context(); 
-                $courseid = $coursecontext->instanceid;
+                $context = $PAGE->context;
+                list($context, $course, $cm) = get_context_info_array($context->id);
+                
+                $courseid = $course->id;
                 
                 
                 if (empty($courseid)) {
@@ -294,8 +296,10 @@ if ($version) {
             $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
             //$courseid = get_courseid_from_context($this->context);
-            $coursecontext = $context->get_course_context(); 
-            $courseid = $coursecontext->instanceid;
+            $context = $PAGE->context;
+            list($context, $course, $cm) = get_context_info_array($context->id);
+            
+            $courseid = $course->id;
             
             if (!$this->root_category_initialized() || empty($connection) ||
                 (empty($system_access) && empty($shared_access))) {
@@ -696,8 +700,10 @@ if ($version) {
 
             } catch (Exception $exp) {
                 //$courseid = get_courseid_from_context($PAGE->context);
-                $coursecontext = $context->get_course_context(); 
-                $courseid = $coursecontext->instanceid;
+                $context = $PAGE->context;
+                list($context, $course, $cm) = get_context_info_array($context->id);
+                
+                $courseid = $course->id;
                 
                 if (empty($courseid)) {
                     $courseid = 1;
@@ -881,8 +887,10 @@ if ($version) {
             $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
             //$courseid = get_courseid_from_context($this->context);
-            $coursecontext = $context->get_course_context(); 
-            $courseid = $coursecontext->instanceid;
+            $context = $PAGE->context;
+            list($context, $course, $cm) = get_context_info_array($context->id);
+            
+            $courseid = $course->id;
             
             if (!$this->root_category_initialized() || empty($connection) ||
                 (empty($system_access) && empty($shared_access))) {
