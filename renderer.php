@@ -62,8 +62,9 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
                 $kalvidres->uiconf_id = $new_player;
             }
 
-            $courseid = get_courseid_from_context($PAGE->context);
-
+            //$courseid = get_courseid_from_context($PAGE->context);
+            $courseid = $this->context->get_course_context()->instanceid;
+            
             // Set the session
             $session = local_kaltura_generate_kaltura_session(array($entry_obj->id));
 
