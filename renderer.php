@@ -49,7 +49,7 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
     }
     
     function embed_video($kalvidres) {
-        global $PAGE;
+        global $PAGE, $COURSE;
 
         $output = '';
         $entry_obj = local_kaltura_get_ready_entry_object($kalvidres->entry_id);
@@ -63,7 +63,7 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
             }
 
             //$courseid = get_courseid_from_context($PAGE->context);
-            $courseid = $this->context->get_course_context()->instanceid;
+            $courseid = $COURSE->id;
             
             // Set the session
             $session = local_kaltura_generate_kaltura_session(array($entry_obj->id));
