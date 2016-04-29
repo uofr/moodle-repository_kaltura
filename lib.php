@@ -874,7 +874,7 @@ if ($version) {
         }
 
         public function get_listing($path='', $page = 1) {
-            global $USER, $DB;
+            global $USER, $DB, $PAGE;
 
             $course_access = array();
             $ret = array();
