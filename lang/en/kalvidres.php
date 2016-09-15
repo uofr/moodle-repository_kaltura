@@ -33,6 +33,7 @@ $string['media_method'] = 'Media';
 $string['media_creation'] = 'Media Type';
 //$string['media_creation_help'] = 'Select the method of media you would like to add.  <b>Record Screen</b> will open a screen recording widget, where you can record the actions you make on your desktop.  <b>Upload Media</b> will open the Kaltura Content Wizard where you can upload media from your computer or select previously uploaded media.';
 $string['media_creation_help'] = 'The <b>Add Media</b> button will open the Kaltura Contribution Wizard where you can upload video from your computer, select from previously uploaded media, or record directly from your webcam.';
+$string['media_viewed'] = 'Media viewed';
 $string['scr_loading'] = 'Loading...';
 $string['kalvidres:screenrecorder'] = 'Screen recorder';
 $string['checkingforjava'] = 'Checking for Java';

@@ -70,7 +70,18 @@ if ($connection) {
 
 $context = $PAGE->context;
 
-add_to_log($course->id, 'kalvidres', 'view video resource', 'view.php?id='.$cm->id, $kalvidres->id, $cm->id);
+//add_to_log($course->id, 'kalvidres', 'view video resource', 'view.php?id='.$cm->id, $kalvidres->id, $cm->id);
+
+$params = array(
+    'context' => $context,
+    'objectid' => $kalvidres->id
+);
+$event = \mod_kalvidres\event\course_module_viewed::create($params);
+$event->add_record_snapshot('course_modules', $cm);
+$event->add_record_snapshot('course', $course);
+$event->add_record_snapshot('kalvidres', $kalvidres);
+$event->trigger();
+
 
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
