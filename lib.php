@@ -93,13 +93,15 @@ function kalvidres_delete_instance($id) {
  * @return null
  * @todo Finish documenting this function
  */
+//This function is not required; it is handled by the default functionality in report/outline/user.php
+/*
 function kalvidres_user_outline($course, $user, $mod, $kalvidres) {
     $return = new stdClass;
     $return->time = 0;
     $return->info = ''; //TODO finish this function
     return $return;
 }
-
+*/
 /**
  * Print a detailed representation of what a user has done with
  * a given particular instance of this module, for user activity reports.
@@ -107,10 +109,12 @@ function kalvidres_user_outline($course, $user, $mod, $kalvidres) {
  * @return boolean
  * @todo Finish documenting this function
  */
+//This function is not required; it is handled by the default functionality in report/outline/user.php
+/*
 function kalvidres_user_complete($course, $user, $mod, $kalvidres) {
     return true;  //TODO: finish this function
 }
-
+*/
 /**
  * Given a course and a time, this module should find recent activity
  * that has occurred in kalvidres activities and print it out.
