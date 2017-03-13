@@ -24,7 +24,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/* List of handlers */
+/* List of handlers - DEPRECATED */
+/*
 $handlers = array (
     'course_deleted' => array (
         'handlerfile'      => '/repository/kaltura/locallib.php',
@@ -33,4 +34,18 @@ $handlers = array (
         'internal'         => 1,
     ),
     
+);
+*/
+
+// List of observers.
+$observers = array(
+    array(
+        'eventname'   => '\core\event\course_deleted',
+        'priority'    => 1,
+        'callback'    => '\repository_kaltura\eventobservers::course_deleted',
+    )/*,
+    array(
+        'eventname'   => '*',
+        'callback'    => '\tool_monitor\eventobservers::process_event',
+    )*/
 );
