@@ -62,7 +62,10 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
 		}
 		
 		
-		if (array_key_exists($kalvidres->entry_id,$id_map)) $kalvidres->entry_id = $id_map[$kalvidres->entry_id];
+		if (array_key_exists($kalvidres->entry_id,$id_map)) {
+			$kalvidres->entry_id = $id_map[$kalvidres->entry_id];
+			$kalvidres->uiconf_id = local_kaltura_get_player_uiconf('player_resource');
+		}
 
         $output = '';
         $entry_obj = local_kaltura_get_ready_entry_object($kalvidres->entry_id);
