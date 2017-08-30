@@ -87,9 +87,7 @@ class kaltura_connection {
         $SESSION->kaltura_con             = serialize(self::$connection);
         $SESSION->kaltura_con_timeout     = self::$timeout;
         $SESSION->kaltura_con_timestarted = self::$timestarted;
-
     }
-
 }
 
 
@@ -195,7 +193,7 @@ class external extends \external_api {
     /**
      * Returns the kaltura video entity for processing and viewing the video
      *
-     * @param array $courseid of the current course
+     * @param array $moduleid of the current course
      * @return array the kaltura video details
      */
     public static function get_media($moduleid) {
@@ -280,7 +278,7 @@ class external extends \external_api {
      * Returns the kaltura video entity for processing and viewing the video
      *
      * @param array $courseid of the current course
-     * @return array the kaltura video details
+     * @return page content html
      */
     public static function get_page_content($moduleid) {
         
@@ -316,8 +314,7 @@ class external extends \external_api {
         );
     }
     
-     
-      /**
+    /**
      * Describes the parameters for get_uiconfid
      *
      * @return \external_function_parameters
@@ -331,7 +328,7 @@ class external extends \external_api {
      * Returns the kaltura video player id for processing and viewing the video
      *
      * @param array $module of the current course
-     * @return array the kaltura video details
+     * @return uiconfid int
      */
     public static function get_uiconfid($moduleid) {
         
@@ -376,10 +373,11 @@ class external extends \external_api {
         );
     }
     /**
-     * Returns the kaltura video entity for processing and viewing the video
+     * Returns the current chapter html for app processing
      *
-     * @param array $courseid of the current course
-     * @return array the kaltura video details
+     * @param array $moduleid of the current course
+     * @param array $chapterid of the current chapter
+     * @return html of chapter content
      */
     public static function get_book_chapters($moduleid, $chapterid) {
         
@@ -396,36 +394,21 @@ class external extends \external_api {
         $cm = get_coursemodule_from_id('book', $moduleid, 0, false, MUST_EXIST);
         $course = $DB->get_record('course', array('id'=>$cm->course), '*', MUST_EXIST);
         $book = $DB->get_record('book', array('id'=>$cm->instance), '*', MUST_EXIST);
-       // $context = get_context_instance(CONTEXT_USER, $userid, MUST_EXIST);
-       // $context = context_module::instance($cm->id);
         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
         
-        
-        
-        $my_file = $CFG->dirroot  . '/mod/kalvidres/classes/testing.txt';
-        $handle = fopen($my_file, 'w') or die('Cannot open file:  '.$my_file);
-       
         
         // Chapter doesnt exist or it is hidden for students
         if ((!$chapter = $DB->get_record('book_chapters', array('id' => $chapterid, 'bookid' => $book->id))) or ($chapter->hidden and !$viewhidden)) {
             print_error('errorchapter', 'mod_book', $courseurl);
         }
-        $data = 'This is the data3 '.json_encode($chapter);
-        fwrite($handle, $data);
-        
-        fclose($handle);
-        
-        
-        
-        
         
         $result = [];
         $result['responses'] = $chapter->content;
         $result['warnings'] = $warnings; 
         return $result;
     }
-    /**
-     * Describes the get_page_content return value.
+    /**   
+     * Describes the get_book_chapters return value.
      *
      * @return \external_single_structure
      */
