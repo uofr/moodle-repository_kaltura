@@ -20,7 +20,7 @@ defined('MOODLE_INTERNAL') || die;
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->dirroot  . '/local/kaltura/API/KalturaClient.php');
 require_once($CFG->dirroot . '/local/kaltura/kaltura_entries.class.php');
-require_once($CFG->dirroot . '\local\kaltura\locallib.php');
+require_once($CFG->dirroot . '/local/kaltura/locallib.php');
 require_once($CFG->dirroot  . '/mod/book/lib.php');
 require_once($CFG->dirroot  . '/mod/book/locallib.php');
 require_once($CFG->libdir.'/completionlib.php');
