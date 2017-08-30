@@ -319,7 +319,7 @@ class external extends \external_api {
      *
      * @return \external_function_parameters
      */
-    public static function get_uiconfid_parameters() {
+    public static function get_video_info_parameters() {
         return new \external_function_parameters (
             ['moduleid' => new \external_value(PARAM_INT, 'course instance id')]
         );
@@ -330,21 +330,23 @@ class external extends \external_api {
      * @param array $module of the current course
      * @return uiconfid int
      */
-    public static function get_uiconfid($moduleid) {
+    public static function get_video_info($moduleid) {
         
         global $CFG, $DB, $SESSION;
         $returnedinstance = [];
         $warnings = [];
         
-        $params = self::validate_parameters(self::get_uiconfid_parameters(), ['moduleid' => $moduleid]);
+        $params = self::validate_parameters(self::get_video_info_parameters(), ['moduleid' => $moduleid]);
         if (empty($params['courseids'])) {
             $params['courseids'] = array_keys(enrol_get_my_courses());
         }
         
         $uiconf_id = local_kaltura_get_player_uiconf('player_filter');
+        $partnerid = local_kaltura_get_partner_id();
         
         $result = [];
-        $result['responses'] = $uiconf_id;
+        $result['uiconfid'] = $uiconf_id;
+        $result['pid'] = $partnerid;
         $result['warnings'] = $warnings; 
         return $result;
     }
@@ -353,9 +355,10 @@ class external extends \external_api {
      *
      * @return \external_single_structure
      */
-    public static function get_uiconfid_returns() {
+    public static function get_video_info_returns() {
         return new \external_single_structure(
-            ['responses' => new \external_value(PARAM_INT, ' id of kaltura player'),
+            ['uiconfid' => new \external_value(PARAM_INT, ' id of kaltura player'),
+             'pid' => new \external_value(PARAM_INT, ' partner id'),
              'warnings' => new \external_warnings(),
             ]
         );
