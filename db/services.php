@@ -40,10 +40,10 @@ $functions = array(
         'capabilities'  => 'mod/kalvidres:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ),
-    'mod_kalvidres_get_uiconfid' => array(
+    'mod_kalvidres_get_video_info' => array(
         'classname'     => 'mod_kalvidres\external',
-        'methodname'    => 'get_uiconfid',
-        'description'   => 'Returns kaltura player id',
+        'methodname'    => 'get_video_info',
+        'description'   => 'Returns kaltura player id, and partner id',
         'type'          => 'read',
         'capabilities'  => 'mod/kalvidres:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
