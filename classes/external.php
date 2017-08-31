@@ -25,10 +25,6 @@ require_once($CFG->dirroot  . '/mod/book/lib.php');
 require_once($CFG->dirroot  . '/mod/book/locallib.php');
 require_once($CFG->libdir.'/completionlib.php');
 
-
-
-	
-	
 /**
  * Connection Class
  */
@@ -319,7 +315,7 @@ class external extends \external_api {
     }
     
     /**
-     * Describes the parameters for get_uiconfid
+     * Describes the parameters for get_video_info
      *
      * @return \external_function_parameters
      */
@@ -329,7 +325,7 @@ class external extends \external_api {
         );
     }
     /**
-     * Returns the kaltura video player id for processing and viewing the video
+     * Returns the kaltura video player id and partner id for processing and viewing the video
      *
      * @param array $module of the current course
      * @return uiconfid int
@@ -355,7 +351,7 @@ class external extends \external_api {
         return $result;
     }
     /**
-     * Describes the get_page_content return value.
+     * Describes the get_video_info return value.
      *
      * @return \external_single_structure
      */
@@ -369,7 +365,7 @@ class external extends \external_api {
     }
     
      /**
-     * Describes the parameters for get_uiconfid
+     * Describes the parameters for get_entry_id
      *
      * @return \external_function_parameters
      */
@@ -379,7 +375,7 @@ class external extends \external_api {
         );
     }
     /**
-     * Returns the kaltura video player id for processing and viewing the video
+     * Returns the video entryid for processing and viewing the video
      *
      * @param array $module of the current course
      * @return uiconfid int
@@ -404,7 +400,6 @@ class external extends \external_api {
 			$id_map[$elms[1]] = $elms[0];
 		}
          
-        
         $newtext = (array_key_exists($search,$id_map)) ? $id_map[$search] : $search;
          
         $result = [];
@@ -413,7 +408,7 @@ class external extends \external_api {
         return $result;
     }
     /**
-     * Describes the get_page_content return value.
+     * Describes the get_entry_id return value.
      *
      * @return \external_single_structure
      */
