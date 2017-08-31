@@ -56,5 +56,14 @@ $functions = array(
         'capabilities'  => 'mod/kalvidres:view',
         'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ),
+      'mod_kalvidres_get_entry_id' => array(
+        'classname'     => 'mod_kalvidres\external',
+        'methodname'    => 'get_entry_id',
+        'description'   => 'Returns correct entry id',
+        'type'          => 'read',
+        'capabilities'  => 'mod/kalvidres:view',
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+    ),
+      
       
 );
