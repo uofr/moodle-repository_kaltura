@@ -41,6 +41,8 @@ define('REPOSITORY_KALTURA_COURSE_SHARE', 'CourseShare');
 define('REPOSITORY_KALTURA_SHARED_PATH', '/shared');
 define('REPOSITORY_KALTURA_USED_PATH', '/used');
 define('REPOSITORY_KALTURA_SITE_SHARED_PATH', '/siteshare');
+//playlists??
+define('REPOSITORY_KALTURA_SITE_PLAYLISTS_PATH', '/playlists');
 
 
 define('REPOSITORY_KALTURA_MYMEDIA_PATH', '/own');
@@ -1033,6 +1035,11 @@ function repository_kaltura_get_system_shared_listing($ret, $path, $system_acces
         $name       = get_string('folder_site_shared_videos', 'repository_kaltura');
         $short_name = get_string('folder_site_shared_videos_shortname', 'repository_kaltura');
         $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SITE_SHARED_PATH);
+		
+		//playlist support??
+        $name       = get_string('folder_site_playlists', 'repository_kaltura');
+        $short_name = get_string('folder_site_playlists_shortname', 'repository_kaltura');
+        $listing[]  = repository_kaltura_create_folder($name, $short_name, REPOSITORY_KALTURA_SITE_PLAYLISTS_PATH);
 
         $ret['path'] = $newpath;
         $ret['list'] = $listing;
@@ -1045,6 +1052,11 @@ function repository_kaltura_get_system_shared_listing($ret, $path, $system_acces
     } else if (false !== strpos($path, REPOSITORY_KALTURA_SITE_SHARED_PATH)) { // If the user is in the site shared folder
 
         $ret_temp = repository_kaltura_get_site_video_listing($path, REPOSITORY_KALTURA_SITE_SHARED_PATH, $page);
+        $ret = array_merge($ret, $ret_temp);
+
+    } else if (false !== strpos($path, REPOSITORY_KALTURA_SITE_PLAYLISTS_PATH)) { // If the user is in the playlists folder
+
+        $ret_temp = repository_kaltura_get_playlist_listing($shared_access, $path, REPOSITORY_KALTURA_SITE_PLAYLISTS_PATH, $page);
         $ret = array_merge($ret, $ret_temp);
 
     } else {
@@ -1132,6 +1144,69 @@ function repository_kaltura_get_site_video_listing($path, $type_path, $page) {
     $empty_list = array();
 
     $search_results = repository_kaltura_search_videos($connection, '', '',
+                                    $empty_list, $page,
+                                    $type);
+
+    $uri         = local_kaltura_get_host();
+    $uri         = rtrim($uri, '/');
+    $partner_id  = local_kaltura_get_partner_id();
+    $ui_conf_id  = local_kaltura_get_player_uiconf();
+    $listing     = repository_kaltura_format_data($search_results, $uri, $partner_id, $ui_conf_id);
+
+    $ret['path'] = $newpath;
+    $ret['list'] = $listing;
+
+
+    if (!empty($search_results) && $search_results->totalCount > $page_size) {
+
+        $ret['page'] = $page;
+        $ret['pages'] = ceil($search_results->totalCount / $page_size);
+        $ret['total'] = $search_results->totalCount;
+        $ret['perpage'] = (int) $page_size;
+
+    }
+
+    return $ret;
+}
+
+/**
+ * This function constructs displays all playlists that are marked as shared with
+ * site.
+ *
+ * @param string - navigation crumb trail if either /shared or /used is passed
+ * @param string - either constant REPOSITORY_KALTURA_SHARED_PATH or REPOSITORY_KALTURA_USED_PATH
+ * @param int - current page
+ */
+function repository_kaltura_get_site_playlist_listing($path, $type_path, $page) {
+
+    $newpath     = array();
+    $listing     = array();
+    $ret['list'] = array();
+    $sub_crumb   = '';
+    $type        = '';
+
+    // Check if at least one path delimter exists
+    if (0 >= substr_count($path, '/')) {
+        return $ret;
+    }
+
+    $sub_crumb = get_string('crumb_site_playlists', 'repository_kaltura');
+    $type = 'site_shared';
+
+    $page_size = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'itemsperpage');
+
+    // If they are deeper than the root of the course folder then determine the course
+    // and display the videos for the course
+    $kaltura    = new kaltura_connection();
+    $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
+
+    // Build navigation path
+    $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
+    $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
+
+    $empty_list = array();
+
+    $search_results = repository_kaltura_search_playlists($connection, '', '',
                                     $empty_list, $page,
                                     $type);
 
@@ -1426,6 +1501,34 @@ function repository_kaltura_search_videos($connection, $name, $tags, $courses = 
 
 }
 
+
+/**
+ * This functions retrieves videos that match the search criteria and searches
+ * through the custom metadata profile for course ids that match
+ *
+ * @param obj - Kaltura connection object
+ * @param string - video name
+ * @param string - video tags
+ * @param array - array of Moodle course ids whose keys are the course ids
+ * @param int - pager index
+ * @param string - 'used' to search for video used in courses or 'shared' to
+ * search for videos shared with courses
+ *
+ * @return array
+ */
+function repository_kaltura_search_playlists($connection, $name, $tags, $courses = array(), $page_index = 0, $search_for = 'shared') {
+
+    $results = array();
+
+    // Create filter
+    $filter = repository_kaltura_create_media_filter($name, $tags);
+
+	$results = repository_kaltura_retrieve_site_playlists($connection, $filter, $page_index);
+
+    return $results;
+
+}
+
 /**
  * This function retrieves videos that have been shared with the site
  *
@@ -1469,6 +1572,59 @@ function repository_kaltura_retrieve_site_shared_videos($connection, $filter, $p
 
     return $results;
 }
+
+
+/**
+ * This function retrieves playlists that have been shared with the site
+ *
+ * @param obj - Kaltura connection object
+ * @param obj - KalturaMediaEntryFilter @see repository_kaltura_create_media_filter()
+ * @param int - current page index
+ */
+function repository_kaltura_retrieve_site_playlists($connection, $filter, $page_index) {
+    $results = array();
+	
+	/*
+    // Get metadata profile id
+    // Retrieve the custom metadata profile id from the repository configuration option
+    // This is a big performance gain as opposed to using @see repository_kaltura_get_metadata_profile()
+    $metadata_profile_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'metadata_profile_id');
+
+    if (empty($metadata_profile_id)) {
+        return array();
+    }
+
+    // Get the xPath for the field we are searching against
+    $xpath = repository_kaltura_get_metadata_share_field_path($connection, $metadata_profile_id, REPOSITORY_KALTURA_SYSTEM_SHARE);
+
+    // Create the advanced search filter
+    if (false !== $xpath) {
+
+        $adv_filter = repository_kaltura_create_site_shared_adv_search_filter($xpath, $metadata_profile_id);
+
+        if (false === $adv_filter) {
+            return array();
+        }
+
+        // Set the advanced search filter
+        $filter->advancedSearch = $adv_filter;
+    }
+	*/
+	
+	$kfilter = new KalturaPlaylistFilter();
+	$kfilter->orderBy = KalturaPlaylistOrderBy::NAME_ASC;
+
+	//$result = $kclient->playlist->listAction($kfilter);
+	
+    // Create pager object
+    $pager = repository_kaltura_create_pager($page_index);
+
+    // Get results
+    $results = $connection->playlist->listAction($kfilter, $pager);
+
+    return $results;
+}
+
 
 /**
  * This function retrieves videos whose categories match the Moodle course ids.
