@@ -22,8 +22,16 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once($CFG->dirroot . '/mod/kalvidres/backup/moodle2/backup_kalvidres_stepslib.php'); // Because it exists (must)
-require_once($CFG->dirroot . '/mod/kalvidres/backup/moodle2/backup_kalvidres_settingslib.php'); // Because it exists (optional)
+require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
+// Because it exists (must).
+require_once(dirname(__FILE__) . '/backup_kalvidres_stepslib.php');
+// Because it exists (must).
+require_once(dirname(__FILE__) . '/backup_kalvidres_settingslib.php');
+
+if (!defined('MOODLE_INTERNAL')) {
+    // It must be included from a Moodle page.
+    die('Direct access to this script is forbidden.');
+}
 
 /**
  * kalvidres backup task that provides all the settings and steps to perform one

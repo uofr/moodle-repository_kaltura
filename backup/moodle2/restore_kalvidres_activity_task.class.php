@@ -22,9 +22,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
+// Because it exists (must).
+require_once(dirname(__FILE__) . '/restore_kalvidres_stepslib.php');
 
-require_once($CFG->dirroot . '/mod/kalvidres/backup/moodle2/restore_kalvidres_stepslib.php'); // Because it exists (must)
+if (!defined('MOODLE_INTERNAL')) {
+    // It must be included from a Moodle page.
+    die('Direct access to this script is forbidden.');
+}
 
 /**
  * kalvidres restore task that provides all the settings and steps to perform one

@@ -21,8 +21,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+
+if (!defined('MOODLE_INTERNAL')) {
+    // It must be included from a Moodle page.
+    die('Direct access to this script is forbidden.');
 }
 
 /**
@@ -93,15 +96,13 @@ function kalvidres_delete_instance($id) {
  * @return null
  * @todo Finish documenting this function
  */
-//This function is not required; it is handled by the default functionality in report/outline/user.php
-/*
 function kalvidres_user_outline($course, $user, $mod, $kalvidres) {
     $return = new stdClass;
     $return->time = 0;
-    $return->info = ''; //TODO finish this function
+    $return->info = ''; // TODO finish this function.
     return $return;
 }
-*/
+
 /**
  * Print a detailed representation of what a user has done with
  * a given particular instance of this module, for user activity reports.
@@ -109,12 +110,10 @@ function kalvidres_user_outline($course, $user, $mod, $kalvidres) {
  * @return boolean
  * @todo Finish documenting this function
  */
-//This function is not required; it is handled by the default functionality in report/outline/user.php
-/*
 function kalvidres_user_complete($course, $user, $mod, $kalvidres) {
-    return true;  //TODO: finish this function
+    return true;  // TODO: finish this function.
 }
-*/
+
 /**
  * Given a course and a time, this module should find recent activity
  * that has occurred in kalvidres activities and print it out.
@@ -159,16 +158,25 @@ function kalvidres_get_participants($kalvidresid) {
  */
 function kalvidres_supports($feature) {
     switch($feature) {
-        case FEATURE_MOD_ARCHETYPE:           return MOD_ARCHETYPE_RESOURCE;
-        case FEATURE_GROUPS:                  return true;
-        case FEATURE_GROUPINGS:               return true;
-        case FEATURE_GROUPMEMBERSONLY:        return true;
-        case FEATURE_MOD_INTRO:               return true;
-        case FEATURE_COMPLETION_TRACKS_VIEWS: return false;
-        case FEATURE_GRADE_HAS_GRADE:         return false;
-        case FEATURE_GRADE_OUTCOMES:          return false;
-        case FEATURE_BACKUP_MOODLE2:          return true;
-
-        default: return null;
+        case FEATURE_MOD_ARCHETYPE:
+            return MOD_ARCHETYPE_RESOURCE;
+        case FEATURE_GROUPS:
+            return true;
+        case FEATURE_GROUPINGS:
+            return true;
+        case FEATURE_GROUPMEMBERSONLY:
+            return true;
+        case FEATURE_MOD_INTRO:
+            return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS:
+            return false;
+        case FEATURE_GRADE_HAS_GRADE:
+            return false;
+        case FEATURE_GRADE_OUTCOMES:
+            return false;
+        case FEATURE_BACKUP_MOODLE2:
+            return true;
+        default:
+            return null;
     }
 }

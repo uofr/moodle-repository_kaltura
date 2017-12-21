@@ -22,6 +22,13 @@
  *
  */
 
+require_once(dirname(dirname(dirname(dirname(__FILE__)))) . '/config.php');
+
+if (!defined('MOODLE_INTERNAL')) {
+    // It must be included from a Moodle page.
+    die('Direct access to this script is forbidden.');
+}
+
 $capabilities = array(
 
     'mod/kalvidres:addinstance' => array(
@@ -33,16 +40,6 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         ),
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
-    ),
-
-    'mod/kalvidres:screenrecorder' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW
-        )
-   )
+    )
 
  );

@@ -26,15 +26,14 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php'
 
 $id = optional_param('id', 0, PARAM_INT);           // Course Module ID
 
-// Retrieve module instance
+// Retrieve module instance.
 if (empty($id)) {
-    print_error('invalidid', 'kalvidres');
+    print_error('invalid course module id - ' . $id, 'kalvidres');
 }
 
 if (!empty($id)) {
-
     if (! $cm = get_coursemodule_from_id('kalvidres', $id)) {
-        print_error('invalidcoursemodule');
+        print_error('invalid_coursemodule', 'kalvidres');
     }
 
     if (! $course = $DB->get_record('course', array('id' => $cm->course))) {
@@ -48,13 +47,16 @@ if (!empty($id)) {
 
 require_course_login($course->id, true, $cm);
 
-global $SESSION, $CFG;
+global $SESSION, $CFG, $USER, $COURSE;
 
 $PAGE->set_url('/mod/kalvidres/view.php', array('id'=>$id));
 $PAGE->set_title(format_string($kalvidres->name));
 $PAGE->set_heading($course->fullname);
 
-// Try connection
+$url = new moodle_url('/local/kaltura/js/jquery.js');
+$PAGE->requires->js($url, true);
+
+// Try connection.
 $kaltura = new kaltura_connection();
 $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
@@ -70,7 +72,7 @@ if ($connection) {
 
 $context = $PAGE->context;
 
-//add_to_log($course->id, 'kalvidres', 'view video resource', 'view.php?id='.$cm->id, $kalvidres->id, $cm->id);
+$admin = false;
 
 $params = array(
     'context' => $context,
@@ -91,15 +93,13 @@ echo $OUTPUT->header();
 
 $renderer = $PAGE->get_renderer('mod_kalvidres');
 
-echo html_writer::start_tag('h2');
-echo $renderer->display_mod_info($kalvidres->name);
-echo html_writer::end_tag('h2');
+echo $OUTPUT->box_start('generalbox');
 
-if (!empty($kalvidres->intro)) {
-    echo $OUTPUT->box_start('generalbox boxaligncenter','intro');
-    echo format_module_intro('kalvidres', $kalvidres, $cm->id);
-    echo $OUTPUT->box_end();
-}
+echo $renderer->display_mod_info($kalvidres->media_title);
+
+echo format_module_intro('kalvidres', $kalvidres, $cm->id);
+
+echo $OUTPUT->box_end();
 
 if ($connection) {
 
@@ -109,25 +109,54 @@ if ($connection) {
 
         $category = false;
 
-        $enabled = local_kaltura_kaltura_repository_enabled();
+    // Embed a kaltura media.
+    if (!empty($kalvidres->entry_id)) {
 
-        if ($enabled) {
-            require_once($CFG->dirroot.'/repository/kaltura/locallib.php');
+        try {
+            $media = $connection->media->get($kalvidres->entry_id);
 
-            // Create the course category
-            $category = repository_kaltura_create_course_category($connection, $course->id);
-        }
+            if ($media !== null) {
+                
 
-        if (!empty($category) && $enabled) {
-            repository_kaltura_add_video_course_reference($connection, $course->id, array($kalvidres->entry_id));
+				$category = false;
+
+        		$enabled = local_kaltura_kaltura_repository_enabled();
+
+        		if ($enabled) {
+            		require_once($CFG->dirroot.'/repository/kaltura/locallib.php');
+
+            		// Create the course category
+            		$category = repository_kaltura_create_course_category($connection, $course->id);
+        		}
+
+        		if (!empty($category) && $enabled) {
+            		repository_kaltura_add_video_course_reference($connection, $course->id, array($kalvidres->entry_id));
+        		}
+				
+				echo $renderer->embed_media($kalvidres);
+                
+				if ($student == true) {
+                    echo '<script type="text/javascript" src="js/kalmediares.js"></script>';
+                }
+            }
+        } catch (Exception $ex) {
+            echo '<p>';
+            echo 'Media (id = ' . $kalvidres->entry_id. ') is not avctive.<br>';
+            echo 'This media may have been deleted.';
+            echo '</p>';
         }
     }
 
-    echo $renderer->embed_video($kalvidres);
+    if ($teacher == true || $admin == true) {
+        echo $renderer->create_access_link_markup($cm->id);
+    }
+
 } else {
     echo $renderer->connection_failure();
 }
 
 echo $OUTPUT->footer();
 
-
+function json_safe_encode($data) {
+    return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+}

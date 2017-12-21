@@ -18,14 +18,17 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+
 if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
+    // It must be included from a Moodle page.
+    die('Direct access to this script is forbidden.');
 }
 
-$plugin->version = 2017083120;
+$plugin->version = 2017122001;
 $plugin->component = 'mod_kalvidres';
 $plugin->release = 'Kaltura release 3.1.02 (RL: 2.6.1.1)';
-$plugin->requires = 2013111800;
+$plugin->requires = 2016052300;
 $plugin->cron = 0;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = array(
