@@ -1,5 +1,6 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -18,19 +19,15 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+defined('MOODLE_INTERNAL') || die();
 
-if (!defined('MOODLE_INTERNAL')) {
-    // It must be included from a Moodle page.
-    die('Direct access to this script is forbidden.');
-}
-
-$plugin->version = 2017122001;
 $plugin->component = 'mod_kalvidres';
-$plugin->release = 'Kaltura release 3.1.02 (RL: 2.6.1.1)';
-$plugin->requires = 2016052300;
-$plugin->cron = 0;
+$plugin->version = 2017112700;
+$plugin->release = 'Kaltura Media Resource 1.1.0';
+$plugin->requires = 2015051100;
 $plugin->maturity = MATURITY_STABLE;
+$plugin->cron = 0;
 $plugin->dependencies = array(
-    'local_kaltura' => 2014010901
+    'local_kaltura' => 2017112700,
+    'local_mymedia' => 2017112700
 );

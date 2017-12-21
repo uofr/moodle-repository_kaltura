@@ -328,7 +328,7 @@ class external extends \external_api {
      * Returns the kaltura video player id and partner id for processing and viewing the video
      *
      * @param array $module of the current course
-     * @return uiconfid int
+     * @return uiconf_id int
      */
     public static function get_video_info($moduleid) {
         

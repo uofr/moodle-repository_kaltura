@@ -1,5 +1,6 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -14,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Kaltura video resource settings page
+ * The main mod_kalvidres configuration form
  *
  * @package    mod
  * @subpackage kalvidres
@@ -24,61 +25,66 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php');
 
-if (!defined('MOODLE_INTERNAL')) {
-    // It must be included from a Moodle page.
-    die('Direct access to this script is forbidden.');
-}
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
+require_login();
+
+/**
+ * class of Kaltura Media resource setting form.
+ * @package mod_kalvidres
+ * @copyright  (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_kalvidres_mod_form extends moodleform_mod {
 
-    var $_default_player = false;
+    /** @var default player is set. */
+    protected $_default_player = false;
 
-    function definition() {
-        global $CFG, $COURSE, $PAGE;
+    /**
+     * This function outputs a resource information form.
+     */
+    protected function definition() {
+        global $CFG, $PAGE;
 
         $kaltura = new kaltura_connection();
         $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
-        $login_session = '';
+        $loginsession = '';
 
         if (!empty($connection)) {
-            $login_session = $connection->getKs();
+            $loginsession = $connection->getKs();
         }
 
-        $PAGE->requires->css('/mod/kalvidres/css/styles.css');
+        $PAGE->requires->css('/mod/kalvidres/css/kalvidres.css');
         $PAGE->requires->css('/local/kaltura/css/simple_selector.css');
 
-        $partnerid = local_kaltura_get_partner_id();
-        $host = local_kaltura_get_host();
-        $url = new moodle_url("{$host}/p/{$partner_id}/sp/{$partner_id}/ksr/uiconfId/{$sr_unconf_id}");
-        
-        // This line is needed to avoid a PHP warning when the form is submitted
-        // Because this value is set as the default for one of the formslib elements
+        /*
+         * This line is needed to avoid a PHP warning when the form is submitted.
+         * Because this value is set as the default for one of the formslib elements.
+         */
         $uiconf_id = '';
-        
-        // Check if connection to Kaltura can be established
+
+        // Check if connection to Kaltura can be established.
         if ($connection) {
-            $PAGE->requires->js('/local/kaltura/js/jquery-3.0.0.js', true);
-            $PAGE->requires->js('/local/kaltura/js/simple_selector.js', true);
-
-            $courseid = $COURSE->id;
-
-            $conversionscript = "../local/kaltura/check_conversion.php?courseid={$courseid}&entry_id=";
-            $uiconfid = local_kaltura_get_player_uiconf('player_resource');
-            $progressbarmarkup = $this->draw_progress_bar();
+            $PAGE->requires->js_call_amd('local_kaltura/simpleselector', 'init',
+                                         array($CFG->wwwroot . "/local/kaltura/simple_selector.php",
+                                               get_string('replace_media', 'mod_kalvidres')));
+            $PAGE->requires->js_call_amd('local_kaltura/properties', 'init',
+                                         array($CFG->wwwroot . "/local/kaltura/media_properties.php"));
+            $uiconf_id = local_kaltura_get_player_uiconf('player_resource');
         }
 
         if (local_kaltura_has_mobile_flavor_enabled() && local_kaltura_get_enable_html5()) {
 
-            $url = new moodle_url(local_kaltura_htm5_javascript_url($uiconf_id));
+            $url = new moodle_url(local_kaltura_html5_javascript_url($uiconf_id));
             $PAGE->requires->js($url, true);
         }
 
         $mform =& $this->_form;
 
-        /* Hidden fields */
+        // Hidden fields.
         $attr = array('id' => 'entry_id');
         $mform->addElement('hidden', 'entry_id', '', $attr);
         $mform->setType('entry_id', PARAM_NOTAGS);
@@ -123,7 +129,11 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         if (local_kaltura_login(true, '')) {
             $mform->addElement('header', 'video', get_string('media_hdr', 'kalvidres'));
-            $this->add_media_definition($mform);
+            if (empty($this->current->entry_id)) {
+                $this->add_media_definition($mform, null);
+            } else {
+                $this->add_media_definition($mform, $this->current->entry_id);
+            }
         } else {
             $mform->addElement('static', 'connection_fail', get_string('conn_failed_alt', 'local_kaltura'));
         }
@@ -136,6 +146,10 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
+    /**
+     * This function return HTML markup for progress bar.
+     * @return string - HTML markup for progress bar.
+     */
     private function draw_progress_bar() {
         $attr         = array('id' => 'progress_bar');
         $progress_bar = html_writer::tag('span', '', $attr);
@@ -154,51 +168,53 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
     }
 
+    /**
+     * This function add "Access" part to module form.
+     * @param object $mform - form object.
+     */
     private function add_access_definition($mform) {
         $accessgroup = array();
-        $attry = array('id' => 'internal', 'name' => 'internal');
         $options = array('0' => 'No', '1' => 'Yes');
         $select = $mform->addElement('select', 'internal', get_string('internal', 'mod_kalvidres'), $options);
         $select->setSelected('0');
-        $acessgroup[] =& $select;
+        $accessgroup[] =& $select;
     }
 
+    /**
+     * This function add "Media" part to module form.
+     * @param object $mform - form object.
+     * @param string $entry_id - id of media entry.
+     */
+    private function add_media_definition($mform, $entry_id) {
 
-    private function add_media_definition($mform) {
-        global $COURSE;
+        $thumbnail = $this->get_thumbnail_markup($entry_id);
 
-        $thumbnail = $this->get_thumbnail_markup();
+        $mform->addElement('static', 'add_media_thumb', '&nbsp;', $thumbnail);
 
-        $mform->addElement('static', 'add_video_thumb', '&nbsp;', $thumbnail);
-
-        if (empty($this->current->entry_id)) {
+        if (empty($entry_id)) {
             $prop = array('style' => 'display:none;');
         }
 
-        $radioarray = array();
-        $attributes = array();
-        $context    = null;
-
-        $selectorurl = new moodle_url('/local/kaltura/simple_selector.php');
-        $attr = array('onclick' => 'fadeInSelectorWindow("' . $selectorurl . '")');
-
         $mediagroup = array();
-        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string('add_media', 'kalvidres'), $attr);
+        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string('add_media', 'kalvidres'), array());
 
-        $propertiesurl = new moodle_url('/local/kaltura/media_properties.php');
-        $prop = array('onclick' => 'fadeInPropertiesWindow(\'' . $propertiesurl . '\');');
+        $prop = array();
 
         if (empty($this->current->entry_id)) {
             $prop += array('style' => 'visibility: hidden;');
         }
 
-        $mediagroup[] =& $mform->createElement('button', 'media_properties', get_string('media_properties', 'kalvidres'), $prop);
+        $mediagroup[] =& $mform->createElement('button', 'media_properties',
+                                               get_string('media_properties', 'local_kaltura'), $prop);
 
         $mform->addGroup($mediagroup, 'media_group', '&nbsp;', '&nbsp;', false);
 
     }
 
-
+    /**
+     * This function return HTML markup to display popup panel.
+     * @return string - HTML markup to display popup panel.
+     */
     private function get_popup_markup() {
 
         $output = '';
@@ -233,8 +249,12 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         return $output;
     }
 
-
-    private function get_thumbnail_markup() {
+    /**
+     * This function return HTML markup to display thumbnail.
+     * @param string $entry_id - id of media entry.
+     * @return string - HTML markup to display thumbnail.
+     */
+    private function get_thumbnail_markup($entry_id) {
         global $CFG;
 
         $source = '';
@@ -252,16 +272,14 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $alt    = get_string('add_video', 'kalvidres');
         $title  = get_string('add_video', 'kalvidres');
 
-        if (!empty($this->current->entry_id)) {
+        if (!empty($entry_id)) {
 
-            $entries = new KalturaStaticEntries();
+            $entryobj = KalturaStaticEntries::get_entry($entry_id, null, false);
 
-            $entry_obj = KalturaStaticEntries::get_entry($this->current->entry_id, null, false);
-
-            if (isset($entry_obj->thumbnailUrl)) {
-                $source = $entry_obj->thumbnailUrl;
-                $alt    = $entry_obj->name;
-                $title  = $entry_obj->name;
+            if (isset($entryobj->thumbnailUrl)) {
+                $source = $entryobj->thumbnailUrl;
+                $alt    = $entryobj->name;
+                $title  = $entryobj->name;
             }
 
         }
@@ -269,10 +287,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $attr = array('id' => 'video_thumbnail',
                       'src' => $source,
                       'alt' => $alt,
-                      'title' => $title,
-					  'height' => 240,
-					  'width' => 360,
-                      'onchange' => 'replaceAddMediaLabel(\'' . get_string('replace_media', 'mod_kalvidres') . '\');');
+                      'title' => $title);
 
         $output .= html_writer::empty_tag('img', $attr);
 
@@ -280,14 +295,12 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
     }
 
+
     /**
      * This function returns an array of video resource players.
      *
      * If the override configuration option is checked, then this function will
      * only return a single array entry with the overridden player
-     *
-     * @param none
-     *
      * @return array - First element will be an array whose keys are player ids
      * and values are player name.  Second element will be the default selected
      * player.  The default player is determined by the Kaltura configuraiton
@@ -330,10 +343,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
     /**
      * Create player properties panel markup.  Default values are loaded from
      * the javascript (see function "handle_cancel" in kaltura.js
-     *
-     * @param - none
-     *
-     * @return string - html markup
+     * @return string - html markup for media preferences.
      */
     private function get_media_preferences_markup() {
         $output = '';
@@ -428,7 +438,9 @@ class mod_kalvidres_mod_form extends moodleform_mod {
                                   );
     }
 
-
+    /**
+     * This function changes form information after media selected.
+     */
     public function definition_after_data() {
         $mform = $this->_form;
 

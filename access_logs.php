@@ -15,24 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Prints a particular instance of newmodule
+ * Prints access status for video resource.
  *
  * You can have a rather longer description of the file as well,
  * if you like, and it can span multiple lines.
  *
- * @package    mod
- * @subpackage kalmediares
- * @copyright  (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_kalvidres
+ * @copyright (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php');
 
-if (!defined('MOODLE_INTERNAL')) {
-    // It must be included from a Moodle page.
-    die('Direct access to this script is forbidden.');
-}
+defined('MOODLE_INTERNAL') || die();
 
 global $SESSION, $CFG, $USER, $COURSE, $DB;
 
@@ -75,6 +71,9 @@ require_course_login($course->id, true, $cm);
 $PAGE->set_url('/mod/kalvidres/access_logs.php', array('id' => $id, 'sort' => $sort, 'order' => $order));
 $PAGE->set_title(get_string('access_logs', 'kalvidres') . ':' . format_string($kalvidres->name));
 $PAGE->set_heading($course->fullname);
+$PAGE->set_course($course);
+
+require_login();
 
 $coursenode = $PAGE->navigation->find($id, navigation_node::TYPE_ACTIVITY);
 $thingnode = $coursenode->add(get_string('access_logs', 'kalvidres'),
@@ -127,4 +126,3 @@ if ($admin == false && $teacher == false) {
 }
 
 echo $OUTPUT->footer();
-

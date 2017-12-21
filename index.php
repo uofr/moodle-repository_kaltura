@@ -15,26 +15,39 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Backup setting script.
+ * Displays information about all the resource modules in the requested course
+ *
  * @package   mod_kalvidres
- * @copyright (C) 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
  * @copyright (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * This activity has no particular settings but the inherited from the generic
- * backup_activity_task so here there isn't any class definition, like the ones
- * existing in /backup/moodle2/backup_settingslib.php (activities section).
- */
-
-require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php');
+require_once(dirname(__FILE__) . '/renderable.php');
 
 defined('MOODLE_INTERNAL') || die();
 
-global $PAGE;
+$id = required_param('id', PARAM_INT); // Course ID.
 
-$PAGE->set_url('/mod/kalvidres/backup/moodle2/backup_kalvidres_settingslib.php');
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+
+global $PAGE, $SESSION, $CFG;
+
+$strplural = get_string("modulenameplural", "kalvidres");
+$PAGE->set_url('/mod/kalvidres/index.php', array('id' => $id));
+$PAGE->set_pagelayout('incourse');
+$PAGE->navbar->add($strplural);
+$PAGE->set_url('/mod/kalvidres/index.php');
+$PAGE->set_title($strplural);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_course($course);
 
 require_login();
 
+echo $OUTPUT->header();
+
+$renderer = $PAGE->get_renderer('mod_kalvidres');
+$renderer->display_kalvidresources_table($course);
+
+echo $OUTPUT->footer();

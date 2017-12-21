@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,38 +15,56 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package moodlecore
- * @subpackage backup-moodle2
- * @copyright 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Restore step script.
+ * @package    mod_kalvidres
+ * @copyright  (C) 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
+ * @copyright  (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
 
-if (!defined('MOODLE_INTERNAL')) {
-    // It must be included from a Moodle page.
-    die('Direct access to this script is forbidden.');
-}
+defined('MOODLE_INTERNAL') || die();
+
+global $PAGE;
+
+$PAGE->set_url('/mod/kalvidres/backup/moodle2/restore_kalvidres_stepslib.php');
+
+require_login();
 
 /**
  * Define all the restore steps that will be used by the restore_kalvidres_activity_task
  */
 
 /**
- * Structure step to restore one kalvidres activity
+ * Structure step to restore one kalvidres activity.
+ *
+ * @package    mod_kalvidres
+ * @copyright  (C) 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
+ * @copyright  (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_kalvidres_activity_structure_step extends restore_activity_structure_step {
 
+    /**
+     * Define (add) particular settings this resource can have.
+     * @return object - define structure.
+     */
     protected function define_structure() {
 
         $paths = array();
 
         $paths[] = new restore_path_element('kalvidres', '/activity/kalvidres');
 
-        // Return the paths wrapped into standard activity structure
+        // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
 
+    /**
+     * Define (add) particular settings this resource can have.
+     * @param object $data - array of data.
+     * @return object - kalmediaassign instance.
+     */
     protected function process_kalvidres($data) {
         global $DB;
 
@@ -57,12 +74,15 @@ class restore_kalvidres_activity_structure_step extends restore_activity_structu
 
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
-        // insert the kalvidres record
+        // Insert the kalvidres record.
         $newitemid = $DB->insert_record('kalvidres', $data);
-        // immediately after inserting "activity" record, call this
+        // Immediately after inserting "activity" record, call this.
         $this->apply_activity_instance($newitemid);
     }
 
+    /**
+     * Restore related files.
+     */
     protected function after_execute() {
         // Add kalvidres related files, no need to match by itemname (just internally handled context)
         $this->add_related_files('mod_kalvidres', 'intro', null);

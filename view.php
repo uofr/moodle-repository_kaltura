@@ -1,5 +1,6 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -24,7 +25,9 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php');
 
-$id = optional_param('id', 0, PARAM_INT);           // Course Module ID
+defined('MOODLE_INTERNAL') || die();
+
+$id = optional_param('id', 0, PARAM_INT);  // Course Module ID.
 
 // Retrieve module instance.
 if (empty($id)) {
@@ -37,11 +40,11 @@ if (!empty($id)) {
     }
 
     if (! $course = $DB->get_record('course', array('id' => $cm->course))) {
-        print_error('coursemisconf');
+        print_error('course_misconf');
     }
 
     if (! $kalvidres = $DB->get_record('kalvidres', array("id"=>$cm->instance))) {
-        print_error('invalidid', 'kalvidres');
+        print_error('invalid_id', 'kalvidres');
     }
 }
 
@@ -53,8 +56,7 @@ $PAGE->set_url('/mod/kalvidres/view.php', array('id'=>$id));
 $PAGE->set_title(format_string($kalvidres->name));
 $PAGE->set_heading($course->fullname);
 
-$url = new moodle_url('/local/kaltura/js/jquery.js');
-$PAGE->requires->js($url, true);
+$context = $PAGE->context;
 
 // Try connection.
 $kaltura = new kaltura_connection();
@@ -70,24 +72,39 @@ if ($connection) {
     }
 }
 
-$context = $PAGE->context;
-
 $admin = false;
 
-$params = array(
-    'context' => $context,
-    'objectid' => $kalvidres->id
-);
-$event = \mod_kalvidres\event\course_module_viewed::create($params);
-$event->add_record_snapshot('course_modules', $cm);
-$event->add_record_snapshot('course', $course);
-$event->add_record_snapshot('kalvidres', $kalvidres);
-$event->trigger();
+if (is_siteadmin()) {
+       $admin = true;
+}
 
+$student = false;
+$teacher = false;
+
+$coursecontext = context_course::instance($COURSE->id);
+$roles = get_user_roles($coursecontext, $USER->id);
+foreach ($roles as $role) {
+    if ($role->shortname == 'student' || $role->shortname == 'guest') {
+        $student = true;
+    }
+    if ($role->shortname == 'teacher' || $role->shortname == 'editingteacher') {
+        $teacher = true;
+    }
+}
+
+if ($student == true) {
+    $event = \mod_kalvidres\event\media_resource_viewed::create(array(
+        'objectid' => $kalvidres->id,
+        'context' => context_module::instance($cm->id)
+    ));
+    $event->trigger();
+
+    $url = $CFG->wwwroot . '/mod/kalvidres/trigger.php';
+    $PAGE->requires->js_call_amd('mod_kalvidres/playtrigger', 'init', array($url, $id));
+}
 
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
-
 
 echo $OUTPUT->header();
 
@@ -101,16 +118,15 @@ echo format_module_intro('kalvidres', $kalvidres, $cm->id);
 
 echo $OUTPUT->box_end();
 
-if ($connection) {
-
-    // Check if the repository plug-in exists.  Add Kaltura video to
-    // the Kaltura category
-    if (!empty($kalvidres->entry_id)) {
-
-        $category = false;
+$clientipaddress = local_kaltura_get_client_ipaddress(true);
+if ($kalvidres->internal == 1 and !local_kaltura_check_internal($clientipaddress)) {
+    echo $renderer->create_access_error_markup($clientipaddress);
+} else if ($connection) {
 
     // Embed a kaltura media.
     if (!empty($kalvidres->entry_id)) {
+		
+		$category = false;
 
         try {
             $media = $connection->media->get($kalvidres->entry_id);
@@ -135,9 +151,6 @@ if ($connection) {
 				
 				echo $renderer->embed_media($kalvidres);
                 
-				if ($student == true) {
-                    echo '<script type="text/javascript" src="js/kalmediares.js"></script>';
-                }
             }
         } catch (Exception $ex) {
             echo '<p>';
@@ -156,7 +169,3 @@ if ($connection) {
 }
 
 echo $OUTPUT->footer();
-
-function json_safe_encode($data) {
-    return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-}

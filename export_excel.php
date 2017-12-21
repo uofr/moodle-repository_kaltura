@@ -15,27 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Export Excel file of access logs.
+ * Export Excel file of access status.
  *
  * You can have a rather longer description of the file as well,
  * if you like, and it can span multiple lines.
  *
- * @package    mod
- * @subpackage kalmediares
- * @copyright  (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_kalvidres
+ * @copyright (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->libdir . '/excellib.class.php');
 require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php');
 
-if (!defined('MOODLE_INTERNAL')) {
-    // It must be included from a Moodle page.
-    die('Direct access to this script is forbidden.');
-}
+defined('MOODLE_INTERNAL') || die();
 
-global $SESSION, $CFG, $USER, $COURSE, $DB;
+global $PAGE, $SESSION, $CFG, $USER, $COURSE, $DB;
+
+$PAGE->set_url('/mod/kalvidres/export_excel.php');
+
+require_login();
 
 $id = optional_param('id', 0, PARAM_INT);                // Course Module ID.
 $sort = optional_param('sort', 'lastname', PARAM_TEXT);  // Sorting Key.
@@ -123,9 +123,30 @@ if (($admin == true || ($userrole != 'student' && $userrole != 'guest')) && !emp
 
         $coursecontext = context_course::instance($COURSE->id);
 
-        $query = 'select m.id, m.username, m.firstname, m.lastname, n.plays, n.views, n.first, n.last from ((select distinct u.id, u.username, u.firstname, u.lastname from {role_assignments} as a join {user} as u on u.id=a.userid and a.contextid=' . $coursecontext->id . ' and a.roleid=' . $roleid . ' group by u.username) as m left join (select v.userid, plays, views, least(firstview,ifnull(firstplay, firstview)) as first, greatest(ifnull(firstplay,firstview),ifnull(lastplay,lastview)) as last from ((select userid,count(timecreated) as views, min(timecreated) as firstview, max(timecreated) as lastview from {logstore_standard_log} where component=\'mod_kalvidres\' and action=\'viewed\' and contextinstanceid=' . $id . ' group by userid) as v left join (select userid,count(timecreated) as plays, min(timecreated) as firstplay, max(timecreated) as lastplay from {logstore_standard_log} where component=\'mod_kalvidres\' and action=\'played\' and contextinstanceid=' . $id . ' group by userid) as p on v.userid=p.userid)) as n on n.userid=m.id) order by ' . $sort . ' ' . $order;
+        $query = 'select m.id, m.username, m.firstname, m.lastname, n.plays, n.views, n.first, n.last ';
+        $query .= 'from ((select distinct u.id, u.username, u.firstname, u.lastname from {role_assignments} a join {user} u ';
+        $query .= 'on u.id=a.userid and a.contextid=:cid and a.roleid=:rid ';
+        $query .= 'group by u.username) m ';
+        $query .= 'left join (select v.userid, plays, views, least(firstview,ifnull(firstplay, firstview)) ';
+        $query .= 'first, greatest(ifnull(firstplay,firstview),ifnull(lastplay,lastview)) last ';
+        $query .= 'from ((select userid,count(timecreated) views, min(timecreated) firstview, max(timecreated) lastview ';
+        $query .= 'from {logstore_standard_log} ';
+        $query .= 'where component=\'mod_kalvidres\' and action=\'viewed\' and contextinstanceid=:mid1 group by userid) v ';
+        $query .= 'left join (select userid,count(timecreated) plays, min(timecreated) firstplay, max(timecreated) lastplay ';
+        $query .= 'from {logstore_standard_log} where component=\'mod_kalvidres\' and action=\'played\' and ';
+        $query .= 'contextinstanceid=:mid2 group by userid) p on v.userid=p.userid)) n on n.userid=m.id) ';
+        $query .= 'order by :sort :order';
 
-        $userdata = $DB->get_recordset_sql( $query );
+        $userdata = $DB->get_recordset_sql($query,
+                                           array(
+                                               'cid' => $coursecontext->id,
+                                               'rid' => $roleid,
+                                               'mid1' => $id,
+                                               'mid2' => $id,
+                                               'sort' => $sort,
+                                               'order' => $order
+                                           )
+                                          );
 
         $worksheet[0]->write_string(0, 0, get_string('username', 'moodle'));
         $worksheet[0]->write_string(0, 1, get_string('lastname', 'moodle'));

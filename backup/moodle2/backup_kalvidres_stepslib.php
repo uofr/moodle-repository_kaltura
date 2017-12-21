@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,28 +15,40 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package moodlecore
- * @subpackage backup-moodle2
- * @copyright 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
+ * Backup step script.
+ * @package   mod_kalvidres
+ * @copyright (C) 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
+ * @copyright (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
 
-if (!defined('MOODLE_INTERNAL')) {
-    // It must be included from a Moodle page.
-    die('Direct access to this script is forbidden.');
-}
+defined('MOODLE_INTERNAL') || die();
+
+global $PAGE;
+
+$PAGE->set_url('/mod/kalvidres/backup/moodle2/backup_kalvidres_stepslib.php');
+
+require_login();
 
 /**
  * Define all the backup steps that will be used by the backup_kalvidres_activity_task
  */
 
 /**
- * Define the complete kalvidres structure for backup, with file and id annotations
+ * Define the complete kalvidres structure for backup, with file and id annotations.
+ * @package   mod_kalvidres
+ * @copyright (C) 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
+ * @copyright (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_kalvidres_activity_structure_step extends backup_activity_structure_step {
 
+    /**
+     * Define (add) particular settings this resource can have.
+     * @return object - define structure.
+     */
     protected function define_structure() {
 
         // Define each element separated

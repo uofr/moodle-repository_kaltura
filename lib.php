@@ -1,5 +1,6 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -14,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Kaltura video recourse library of hooks
+ * Library of interface functions and constants for module newmodule
  *
  * @package    mod
  * @subpackage kalvidres
@@ -23,10 +24,9 @@
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
-if (!defined('MOODLE_INTERNAL')) {
-    // It must be included from a Moodle page.
-    die('Direct access to this script is forbidden.');
-}
+defined('MOODLE_INTERNAL') || die();
+
+require_login();
 
 /**
  * Given an object containing all the necessary data,
@@ -92,8 +92,11 @@ function kalvidres_delete_instance($id) {
  * Used for user activity reports.
  * $return->time = the time they did it
  * $return->info = a short text description
- *
- * @return null
+ * @param object $course - Moodle course object.
+ * @param object $user - Moodle user object.
+ * @param object $mod - Moodle moduble object.
+ * @param object $kalvidres - An object from the form in mod_form.php.
+ * @return object - outline of user.
  * @todo Finish documenting this function
  */
 function kalvidres_user_outline($course, $user, $mod, $kalvidres) {
@@ -106,8 +109,11 @@ function kalvidres_user_outline($course, $user, $mod, $kalvidres) {
 /**
  * Print a detailed representation of what a user has done with
  * a given particular instance of this module, for user activity reports.
- *
- * @return boolean
+ * @param object $course - Moodle course object.
+ * @param object $user - Moodle user object.
+ * @param object $mod - Moodle module obuject.
+ * @param object $kalvidres - An object from the form in mod_form.php.
+ * @return boolean - this function always return true.
  * @todo Finish documenting this function
  */
 function kalvidres_user_complete($course, $user, $mod, $kalvidres) {
@@ -118,21 +124,22 @@ function kalvidres_user_complete($course, $user, $mod, $kalvidres) {
  * Given a course and a time, this module should find recent activity
  * that has occurred in kalvidres activities and print it out.
  * Return true if there was output, or false is there was none.
- *
- * @return boolean
+ * @param object $course - Moodle course object.
+ * @param array $viewfullnames - fullnames of course.
+ * @param int $timestart - timestamp.
+ * @return boolean - True if anything was printed, otherwise false.
  * @todo Finish documenting this function
  */
 function kalvidres_print_recent_activity($course, $viewfullnames, $timestart) {
     // TODO: finish this function
-    return false;  //  True if anything was printed, otherwise false
+    return false;  // True if anything was printed, otherwise false.
 }
 
 /**
  * Function to be run periodically according to the moodle cron
  * This function searches for things that need to be done, such
  * as sending out mail, toggling flags etc ...
- *
- * @return boolean
+ * @return bool - this function always return false.
  */
 function kalvidres_cron () {
     return false;
@@ -144,8 +151,8 @@ function kalvidres_cron () {
  * of his role (student, teacher, admin...). The returned objects must contain
  * at least id property. See other modules as example.
  *
- * @param int $kalvidres ID of an instance of this module
- * @return boolean|array false if no participants, array of objects otherwise
+ * @param int $kalvidresid - ID of an instance of this module
+ * @return mixed - false if no participants, array of objects otherwise
  */
 function kalvidres_get_participants($kalvidresid) {
     // TODO: finish this function
@@ -153,8 +160,9 @@ function kalvidres_get_participants($kalvidresid) {
 }
 
 /**
- * @param string $feature FEATURE_xx constant for requested feature
- * @return mixed True if module supports feature, null if doesn't know
+ * This function return support status.
+ * @param string $feature - FEATURE_xx constant for requested feature
+ * @return mixed - True if module supports feature, null if doesn't know
  */
 function kalvidres_supports($feature) {
     switch($feature) {
