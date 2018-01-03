@@ -154,7 +154,7 @@ if ($kalvidres->internal == 1 and !local_kaltura_check_internal($clientipaddress
             }
         } catch (Exception $ex) {
             echo '<p>';
-            echo 'Media (id = ' . $kalvidres->entry_id. ') is not avctive.<br>';
+            echo 'Media (id = ' . $kalvidres->entry_id. ') is not active.<br>';
             echo 'This media may have been deleted.';
             echo '</p>';
         }

@@ -17,9 +17,16 @@
 /**
  * Library of interface functions and constants for module newmodule
  *
- * @package    mod
- * @subpackage kalvidres
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * All the core Moodle functions, neeeded to allow the module to work
+ * integrated in Moodle should be placed here.
+ *
+ * All the newmodule specific functions, needed to implement all the module
+ * logic, should go to locallib.php. This will help to save some memory when
+ * Moodle is performing actions across all modules.
+ *
+ * @package   mod_kalvidres
+ * @copyright (C) 2016-2017 Yamaguchi University <gh-cc@mlex.cc.yamaguchi-u.ac.jp>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -71,8 +78,8 @@ function kalvidres_update_instance($kalvidres) {
  * this function will permanently delete the instance
  * and any data that depends on it.
  *
- * @param int $id Id of the module instance
- * @return boolean Success/Failure
+ * @param int $id - Id of the module instance
+ * @return boolean - Success/Failure
  */
 function kalvidres_delete_instance($id) {
     global $DB;

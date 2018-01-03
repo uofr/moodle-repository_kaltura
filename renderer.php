@@ -126,6 +126,10 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
         return $output;
     }
 
+    /**
+     * This function return HTML markup to display connection error message.
+     * @return string - HTML markup to display connection error message.
+     */
     public function connection_failure() {
         return html_writer::tag('p', get_string('conn_failed_alt', 'local_kaltura'));
     }
@@ -514,7 +518,7 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
     public function create_access_error_markup($ipaddress = 'unknown') {
         $output = '';
         $output .= get_string('invalid_ipaddress', 'kalvidres');
-        $output .= '(Your IP Address : ' . $ipaddress . ')<br>';
+        $output .= '(' . get_string('your_ipaddress', 'kalvidres') . ' : ' . $ipaddress . ')<br>';
         return $output;
     }
 

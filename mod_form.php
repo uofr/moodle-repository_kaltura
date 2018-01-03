@@ -17,8 +17,11 @@
 /**
  * The main mod_kalvidres configuration form
  *
- * @package    mod
- * @subpackage kalvidres
+ * It uses the standard core Moodle formslib. For more info about them, please
+ * visit: http://docs.moodle.org/en/Development:lib/formslib.php
+ *
+ * @package    mod_kalvidres
+ * @copyright  (C) 2016-2017 Yamaguchi University <gh-cc@mlex.cc.yamaguchi-u.ac.jp>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -430,7 +433,10 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         return $output;
     }
 
-
+    /**
+     * This function return media properties.
+     * @return array - media properties.
+     */
     private function get_default_media_properties() {
         return $properties = array('media_prop_player' => 4674741,
                                    'media_prop_dimensions' => 0,

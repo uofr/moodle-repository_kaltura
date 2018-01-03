@@ -15,19 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package mod_kalvidres
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Kaltura Video Resource version file.
+ *
+ * Setting the $plugin->version to 0 prevents the plugin from being installed.
+ * See https://docs.moodle.org/dev/version.php for more info.
+ *
+ * @package   mod_kalvidres
+ * @copyright (C) 2016-2017 Yamaguchi University <gh-cc@mlex.cc.yamaguchi-u.ac.jp>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_kalvidres';
-$plugin->version = 2017112700;
+$plugin->version = 2018010200;
 $plugin->release = 'Kaltura Media Resource 1.1.0';
 $plugin->requires = 2015051100;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->cron = 0;
 $plugin->dependencies = array(
-    'local_kaltura' => 2017112700,
-    'local_mymedia' => 2017112700
+    'local_kaltura' => 2018010200,
+    'local_mymedia' => 2018010200
 );
