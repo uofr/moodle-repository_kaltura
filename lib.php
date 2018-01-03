@@ -188,3 +188,66 @@ function kalvidres_supports($feature) {
             return null;
     }
 }
+
+function kalvidres_cm_info_view(cm_info $cm) {
+    //global $CFG;
+    
+    // UofR Hack - cunnintr
+	// Notify if forum is closed
+    global $CFG, $DB, $OUTPUT, $USER;
+    
+    $mediaid = $cm->instance;
+	
+	$entry = $DB->get_record('kalvidres', array('id' => $mediaid));
+    
+	$out = '';
+    //$out = '{'.print_r($entry,1).'}';
+    
+    //if (!empty($this->current->entry_id)) {
+
+
+        // Check if the entry object is cached
+        $entry_obj  = local_kaltura_get_ready_entry_object($entry->entry_id);
+
+$out = '{'.print_r($entry_obj,1).'}';
+
+        if (isset($entry_obj->thumbnailUrl)) {
+            $source = $entry_obj->thumbnailUrl;
+            $alt    = $entry_obj->name;
+            $title  = $entry_obj->name;
+			
+			if ($entry->height) {
+				$height = $entry->height;
+			}
+			if ($entry->width) {
+				$width = $entry->width;
+			}
+
+
+    $attr = array('id' => 'video_thumbnail',
+                  'src' => $source,
+                  'alt' => $alt,
+                  'title' => $title,
+                  );
+				  
+				  if (isset($height)) {
+					  $attr['height'] = $height;
+				  }
+				  
+				  if (isset($height)) {
+					  $attr['width'] = $width;
+				  }
+
+    $out .= html_writer::empty_tag('img', $attr);
+	
+	        }
+
+		//}
+	
+    
+	
+	$out .= '|'.print_r($mediaid,1).'|';   
+    
+    if (!empty($out)) $cm->set_after_link($out); // UofR Hack
+    
+}

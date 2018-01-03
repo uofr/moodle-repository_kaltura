@@ -84,7 +84,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $mform =& $this->_form;
 
-        // Hidden fields.
+        /* Hidden fields */
         $attr = array('id' => 'entry_id');
         $mform->addElement('hidden', 'entry_id', '', $attr);
         $mform->setType('entry_id', PARAM_NOTAGS);
