@@ -205,29 +205,36 @@ function kalvidres_cm_info_view(cm_info $cm) {
     
     $mediaid = $cm->instance;
 	
-	$entry = $DB->get_record('kalvidres', array('id' => $mediaid));
-    
+	$media_entry = $DB->get_record('kalvidres', array('id' => $mediaid));
+   	
 	$out = '';
+	
+	if (!empty($media_entry->intro)) {
+		$attr = array('class'=>'no-overflow');
+		$out .= html_writer::start_tag('div',$attr);
+		$out .= format_module_intro('kalvidres', $media_entry, $cm->id, false);
+		$out .= html_writer::end_tag('div');
+	}
     //$out = '{'.print_r($entry,1).'}';
     
     //if (!empty($this->current->entry_id)) {
 
 
         // Check if the entry object is cached
-        $entry_obj  = local_kaltura_get_ready_entry_object($entry->entry_id);
+        $entry_obj  = local_kaltura_get_ready_entry_object($media_entry->entry_id);
 
-$out = '{'.print_r($entry_obj,1).'}';
+//$out = '{'.print_r($entry_obj,1).'}';
 
         if (isset($entry_obj->thumbnailUrl)) {
             $source = $entry_obj->thumbnailUrl;
             $alt    = $entry_obj->name;
             $title  = $entry_obj->name;
 			
-			if ($entry->height) {
-				$height = $entry->height;
+			if ($media_entry->height) {
+				$height = $media_entry->height;
 			}
-			if ($entry->width) {
-				$width = $entry->width;
+			if ($media_entry->width) {
+				$width = $media_entry->width;
 			}
 
 
@@ -235,6 +242,7 @@ $out = '{'.print_r($entry_obj,1).'}';
                   'src' => $source,
                   'alt' => $alt,
                   'title' => $title,
+            	  'width'  => '100%'
                   );
 				  
 				  if (isset($height)) {
@@ -245,7 +253,15 @@ $out = '{'.print_r($entry_obj,1).'}';
 					  $attr['width'] = $width;
 				  }
 
+	$linkattr = array(
+	  'href' => $cm->url,
+	);
+				  
+	$out .= html_writer::start_tag('div');
+	$out .= html_writer::start_tag('a', $linkattr);
     $out .= html_writer::empty_tag('img', $attr);
+	$out .= html_writer::end_tag('a');
+	$out .= html_writer::end_tag('div');
 	
 	        }
 
@@ -253,8 +269,45 @@ $out = '{'.print_r($entry_obj,1).'}';
 	
     
 	
-	$out .= '|'.print_r($mediaid,1).'|';   
+	//$out .= '|'.print_r($mediaid,1).'|';   
     
-    if (!empty($out)) $cm->set_after_link($out); // UofR Hack
+    if (!empty($out)) $cm->set_content($out); // UofR Hack
     
+}
+
+/**
+ * Add a get_coursemodule_info function in case any assignment type wants to add 'extra' information
+ * for the course (see resource).
+ *
+ * Given a course_module object, this function returns any "extra" information that may be needed
+ * when printing this activity in a course listing.  See get_array_of_activities() in course/lib.php.
+ *
+ * @param stdClass $coursemodule The coursemodule object (record).
+ * @return cached_cm_info An object on information that the courses
+ *                        will know about (most noticeably, an icon).
+ */
+function kalvidres_get_coursemodule_info($coursemodule) {
+    global $CFG, $DB;
+	
+	/*
+    $dbparams = array('id'=>$coursemodule->instance);
+    $fields = 'id, name, alwaysshowdescription, allowsubmissionsfromdate, intro, introformat';
+    if (! $assignment = $DB->get_record('assign', $dbparams, $fields)) {
+        return false;
+    }
+	*/
+	
+	if (! $kalvidres = $DB->get_record('kalvidres', array('id' => $coursemodule->instance))) {
+        return false;
+    };
+    
+	$result = new cached_cm_info();
+    $result->name = $kalvidres->name;
+    if ($coursemodule->showdescription) {
+        if ($kalvidres->alwaysshowdescription) {
+            // Convert intro to html. Do not filter cached version, filters run at display time.
+            $result->content = format_module_intro('kalvidres', $kalvidres, $coursemodule->id, false);
+        }
+    }
+    return $result;
 }

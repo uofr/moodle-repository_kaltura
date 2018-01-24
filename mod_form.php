@@ -60,7 +60,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
             $loginsession = $connection->getKs();
         }
 
-        $PAGE->requires->css('/mod/kalvidres/css/kalvidres.css');
+        $PAGE->requires->css('/mod/kalvidres/css/kalmediares.css');
         $PAGE->requires->css('/local/kaltura/css/simple_selector.css');
 
         /*
@@ -81,7 +81,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         if (local_kaltura_has_mobile_flavor_enabled() && local_kaltura_get_enable_html5()) {
 
-            $url = new moodle_url(local_kaltura_html5_javascript_url($uiconf_id));
+            $url = new moodle_url(local_kaltura_htm5_javascript_url($uiconf_id));
             $PAGE->requires->js($url, true);
         }
 
@@ -131,8 +131,9 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $this->standard_intro_elements();
 
         if (local_kaltura_login(true, '')) {
-            $mform->addElement('header', 'video', get_string('media_hdr', 'kalvidres'));
-            if (empty($this->current->entry_id)) {
+            $mform->addElement('header', 'video', get_string('video_hdr', 'kalvidres'));
+			
+			if (empty($this->current->entry_id)) {
                 $this->add_media_definition($mform, null);
             } else {
                 $this->add_media_definition($mform, $this->current->entry_id);
@@ -198,8 +199,10 @@ class mod_kalvidres_mod_form extends moodleform_mod {
             $prop = array('style' => 'display:none;');
         }
 
+		$mediagrouplabel = (!empty($entry_id)) ? 'replace_media' : 'add_video';
+
         $mediagroup = array();
-        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string('add_media', 'kalvidres'), array());
+        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'), array());
 
         $prop = array();
 
@@ -276,9 +279,9 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $title  = get_string('add_video', 'kalvidres');
 
         if (!empty($entry_id)) {
-
-            $entryobj = KalturaStaticEntries::get_entry($entry_id, null, false);
-
+			$entries = new KalturaStaticEntries();
+            $entryobj = KalturaStaticEntries::getEntry($entry_id, null, false);
+			//die('entryobj: '.print_r($entryobj,1).'|'.$entry_id);
             if (isset($entryobj->thumbnailUrl)) {
                 $source = $entryobj->thumbnailUrl;
                 $alt    = $entryobj->name;
@@ -287,7 +290,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         }
 
-        $attr = array('id' => 'video_thumbnail',
+        $attr = array('id' => 'media_thumbnail',
                       'src' => $source,
                       'alt' => $alt,
                       'title' => $title);

@@ -112,7 +112,7 @@ $renderer = $PAGE->get_renderer('mod_kalvidres');
 
 echo $OUTPUT->box_start('generalbox');
 
-echo $renderer->display_mod_info($kalvidres->media_title);
+echo $renderer->display_mod_info($kalvidres->video_title);
 
 echo format_module_intro('kalvidres', $kalvidres, $cm->id);
 

@@ -55,7 +55,7 @@ function xmldb_kalvidres_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2016041000, 'kalvidres');
     }
 
-    if ($oldversion < 2017051202) {
+    if ($oldversion < 2018010200) {
         $table = new xmldb_table('kalvidres');
         $field = new xmldb_field('internal');
         if (!$dbman->field_exists($table, $field)) {
@@ -65,7 +65,7 @@ function xmldb_kalvidres_upgrade($oldversion) {
         }
 
         // Plugin kalvidres savepoint reached.
-        upgrade_mod_savepoint(true, 2017051202, 'kalvidres');
+        upgrade_mod_savepoint(true, 2018010200, 'kalvidres');
     }
 
     return true;
