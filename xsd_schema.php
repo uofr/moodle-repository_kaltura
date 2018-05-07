@@ -49,6 +49,59 @@ $schema = '<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             </xsd:appinfo>
           </xsd:annotation>
         </xsd:element>
+				<xsd:element id="md_D2DEC545-5672-4CDE-5361-382A3B3FDAAB" name="StoreMedia" minOccurs="0" maxOccurs="1" type="textType">
+          <xsd:annotation>
+            <xsd:documentation>Store Media</xsd:documentation>
+            <xsd:appinfo>
+              <label>Store Media</label>
+              <key>Store Media</key>
+              <searchable>true</searchable>
+              <timeControl>false</timeControl>
+              <description>Store Media - Indicator for how long the media should be stored</description>
+            </xsd:appinfo>
+          </xsd:annotation>
+	      </xsd:element>
+				<xsd:element id="md_A4BBE327-1452-3BEC-6632-4A275F3EBFDC" name="Assessment" minOccurs="0" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>Assessment</xsd:documentation>
+            <xsd:appinfo>
+              <label>Assessment</label>
+              <key>Assessment</key>
+              <searchable>true</searchable>
+              <description>Assessment - Has this media been submitted for assessment?</description>
+            </xsd:appinfo>
+          </xsd:annotation>
+          <xsd:simpleType>
+            <xsd:restriction base="listType">
+              <xsd:enumeration value="No" default="true"/>
+              <xsd:enumeration value="Yes"/>
+            </xsd:restriction>
+          </xsd:simpleType>
+	      </xsd:element>
+        <xsd:element id="md_C2ACF433-1632-5AAD-3455-2D322E2EFFAB" name="SubmittedData" minOccurs="0" maxOccurs="unbounded" type="textType">
+          <xsd:annotation>
+            <xsd:documentation>Submitted Data</xsd:documentation>
+            <xsd:appinfo>
+              <label>Submitted Data</label>
+              <key>Submitted Data</key>
+              <searchable>true</searchable>
+              <timeControl>false</timeControl>
+              <description>Submitted Data - Data related to the submission</description>
+            </xsd:appinfo>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element id="md_DD3CB215-3342-5DAD-6125-2D35CCACDEAA" name="AssessmentData" minOccurs="0" maxOccurs="unbounded" type="textType">
+          <xsd:annotation>
+            <xsd:documentation>Assessment Data</xsd:documentation>
+            <xsd:appinfo>
+              <label>Assessment Data</label>
+              <key>Assessment Data</key>
+              <searchable>true</searchable>
+              <timeControl>false</timeControl>
+              <description>Assessment Data - Data related to the assessment</description>
+            </xsd:appinfo>
+          </xsd:annotation>
+        </xsd:element>
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>

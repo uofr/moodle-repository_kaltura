@@ -1772,6 +1772,23 @@ function repository_kaltura_create_course_share_metadata_xml($courses = array())
     return $xml;
 }
 
+/**
+ * This function creates storemedia metadata XML
+ *
+ * @param string - String representing storage duration, term name or multiple
+ * @return string - XML
+ */
+function repository_kaltura_create_storemedia_metadata_xml($storemedia = '') {
+    $xml = '';
+
+    if (!empty($storemedia)) {
+        $xml .= '<StoreMedia>'.$storemedia.'</StoreMedia>';
+    }
+
+    return $xml;
+}
+
+
 //
 ///**
 // * This function creates the video's custom metadata xml from the passed
@@ -2017,6 +2034,43 @@ function repository_kaltura_format_video_custom_metadata($connection, $entry_id)
 
 }
 
+function repository_kaltura_storemedia_custom_metadata($connection, $entry_id) {
+		
+  // Retrieve the custom metadata profile id from the repository configuration option
+  // This is a big performance gain as opposed to using @see repository_kaltura_get_metadata_profile()
+  $metadata_profile_id = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'metadata_profile_id');
+
+  if (!$metadata_profile_id) {
+      return array(0, '');
+  }
+
+  $metadata_list_data = repository_kaltura_get_video_custom_metadata($connection, $metadata_profile_id, $entry_id);
+
+  /** Check if the object has at least one element or whether the
+   * object's xml is empty.  This solves issues where a video is
+   * uploaded from another system and for some reason the metadata
+   * object isn't completely created/initialized - KALDEV-391
+   */
+  if (!$metadata_list_data instanceof KalturaMetadataListResponse ||
+      count($metadata_list_data) < 1 ||
+      empty($metadata_list_data->objects[0]->xml)) {
+
+      return array(0, '');
+  }
+
+  // Parse the XML into a useable format
+  $data_schema = new SimpleXMLElement($metadata_list_data->objects[0]->xml);
+  //$data_schema = $metadata_list_data->objects[0]->xml;
+	
+  if (isset($data_schema->StoreMedia)) {
+        $storemedia = (string) $data_schema->StoreMedia;
+  } else {
+  	$storemedia = 'Multiple Terms';
+  }
+	
+	return $storemedia;
+}
+
 /**
  * This function adds a course/video reference to the repository table and adds
  * a video to the course.
@@ -2049,7 +2103,8 @@ function repository_kaltura_add_video_course_reference($connection, $courseid, $
         $root_path = get_config(REPOSITORY_KALTURA_PLUGIN_NAME, 'rootcategory');
 
         if (!$root_path) {
-            add_to_log($courseid, 'repository_kaltura', 'view - root category', '', 'Error retrieving root category');
+            //add_to_log($courseid, 'repository_kaltura', 'view - root category', '', 'Error retrieving root category');
+		        debugging('[repository_kaltura] View - Root Category :: Error retrieving root category. Course: '.$courseid, DEBUG_DEVELOPER);
             return '';
         }
 
@@ -2067,7 +2122,8 @@ function repository_kaltura_add_video_course_reference($connection, $courseid, $
                 $result = $connection->media->get($video_id);
 
                 if (!$result instanceof KalturaMediaEntry) {
-                    add_to_log($courseid, 'repository_kaltura', 'view - retrieving video', '', 'Error retrieving - ' . $video_id);
+                    //add_to_log($courseid, 'repository_kaltura', 'view - retrieving video', '', 'Error retrieving - ' . $video_id);
+		        				debugging('[repository_kaltura] View - Retrieving Video :: Error retrieving video: '.$video_id.' in course: '.$courseid, DEBUG_DEVELOPER);
                     continue;
                 }
 
@@ -2082,7 +2138,8 @@ function repository_kaltura_add_video_course_reference($connection, $courseid, $
                     $update_result = $connection->media->update($result->id, $media_entry);
 
                     if (!$update_result instanceof KalturaMediaEntry) {
-                        add_to_log($courseid, 'repository_kaltura', 'update - categories', '', 'Error updating categories for entry - ' . $video_id);
+                        //add_to_log($courseid, 'repository_kaltura', 'update - categories', '', 'Error updating categories for entry - ' . $video_id);
+												debugging('[repository_kaltura] Update - Categories :: Error updating categories for entry: '.$video_id.' in course: '.$courseid, DEBUG_DEVELOPER);
                         return '';
                     }
                 }
@@ -2096,12 +2153,14 @@ function repository_kaltura_add_video_course_reference($connection, $courseid, $
                 $rec_id = $DB->insert_record('repo_kaltura_videos', $record);
 
                 if (empty($rec_id)) {
-                    add_to_log($courseid, 'repository_kaltura', 'insert - repo reference table', '', 'Error inserting reference - ' . $video_id);
+                    //add_to_log($courseid, 'repository_kaltura', 'insert - repo reference table', '', 'Error inserting reference - ' . $video_id);
+										debugging('[repository_kaltura] Insert - Repo reference table :: Error inserting reference: '.$video_id.' in course: '.$courseid, DEBUG_DEVELOPER);
                 }
             }
         }
     } catch (Exception $exp) {
-        add_to_log($courseid, 'repository_kaltura', 'Error in add_video_course_reference', '', $exp->getMessage());
+        //add_to_log($courseid, 'repository_kaltura', 'Error in add_video_course_reference', '', $exp->getMessage());
+				debugging('[repository_kaltura] Error in add_video_course_reference: '.$exp->getMessage().' in course: '.$courseid, DEBUG_DEVELOPER);
     }
 }
 
@@ -2131,11 +2190,13 @@ function repository_kaltura_delete_category($course) {
             if ($DB->delete_records('repo_kaltura_videos', $param)) {
 
                 $connection->category->delete($category->id);
-                add_to_log($course->id, 'repository_kaltura', 'Course category deleted', '', 'course id - ' . $course->id);
+                //add_to_log($course->id, 'repository_kaltura', 'Course category deleted', '', 'course id - ' . $course->id);
+								debugging('[repository_kaltura] Course category deleted :: course: '.$course->id, DEBUG_DEVELOPER);
             }
         }
     } else {
-        add_to_log($course->id, 'repository_kaltura', 'Course category not deleted', '', 'course id - ' . $course->id);
+        //add_to_log($course->id, 'repository_kaltura', 'Course category not deleted', '', 'course id - ' . $course->id);
+				debugging('[repository_kaltura] Course category not deleted :: course: '.$course->id, DEBUG_DEVELOPER);
     }
 }
 
@@ -2172,7 +2233,8 @@ function repository_kaltura_account_enabled_metadata($connection) {
         return true;
 
     } catch (Exception $ex) {
-        add_to_log(SITEID, 'local_kaltura', ' | metadata no permissions ', '', $ex->getMessage());
+        //add_to_log(SITEID, 'local_kaltura', ' | metadata no permissions ', '', $ex->getMessage());
+				debugging('[repository_kaltura] Metadata no permissions: '.$ex->getMessage(), DEBUG_DEVELOPER);
         return false;
     }
 }

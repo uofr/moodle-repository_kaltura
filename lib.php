@@ -121,7 +121,9 @@ if ($version) {
                     $courseid = 1;
                 }
 
-                add_to_log($courseid, 'repository_kaltura', 'Error while initializing constructor', '', $exp->getMessage());
+                //add_to_log($courseid, 'repository_kaltura', 'Error while initializing constructor', '', $exp->getMessage());
+								debugging('[repository_kaltura] Error while initializing constructor: '.$exp->getMessage().' in course: '.$courseid, DEBUG_DEVELOPER);
+								
             }
 
         }
@@ -709,7 +711,8 @@ if ($version) {
                     $courseid = 1;
                 }
 
-                add_to_log($courseid, 'repository_kaltura', 'Error while initializing constructor', '', $exp->getMessage());
+                //add_to_log($courseid, 'repository_kaltura', 'Error while initializing constructor', '', $exp->getMessage());
+								debugging('[repository_kaltura] Error while initializing constructor: '.$exp->getMessage().' in course: '.$courseid, DEBUG_DEVELOPER);
             }
 
         }
