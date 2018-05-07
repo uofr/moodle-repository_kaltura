@@ -29,6 +29,8 @@ defined('MOODLE_INTERNAL') || die();
 
 $id = optional_param('id', 0, PARAM_INT);  // Course Module ID.
 
+$doAutoPlay = optional_param('autoPlay', 0, PARAM_INT);
+
 // Retrieve module instance.
 if (empty($id)) {
     print_error('invalid course module id - ' . $id, 'kalvidres');
@@ -112,7 +114,7 @@ $renderer = $PAGE->get_renderer('mod_kalvidres');
 
 echo $OUTPUT->box_start('generalbox');
 
-echo $renderer->display_mod_info($kalvidres->video_title);
+echo '<h3>'.$kalvidres->name.'</h3>';
 
 echo format_module_intro('kalvidres', $kalvidres, $cm->id);
 
@@ -148,15 +150,15 @@ if ($kalvidres->internal == 1 and !local_kaltura_check_internal($clientipaddress
         		if (!empty($category) && $enabled) {
             		repository_kaltura_add_video_course_reference($connection, $course->id, array($kalvidres->entry_id));
         		}
-				
+						//die(print_r($doAutoPlay,1));
 				echo $renderer->embed_media($kalvidres);
                 
             }
         } catch (Exception $ex) {
-            echo '<p>';
-            echo 'Media (id = ' . $kalvidres->entry_id. ') is not active.<br>';
-            echo 'This media may have been deleted.';
-            echo '</p>';
+            echo '<div class="alert alert-warning"><p>';
+                        echo 'Entry Id <b>' . $kalvidres->entry_id. '</b> could not be found.';
+                        //echo 'This media may have been deleted.';
+                        echo '</p></div>';
         }
     }
 

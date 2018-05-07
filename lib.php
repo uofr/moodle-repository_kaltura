@@ -30,6 +30,7 @@
  */
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php');
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -191,16 +192,15 @@ function kalvidres_supports($feature) {
             return false;
         case FEATURE_BACKUP_MOODLE2:
             return true;
+        case FEATURE_SHOW_DESCRIPTION:        
+						return true;
         default:
             return null;
     }
 }
 
-function kalvidres_cm_info_view(cm_info $cm) {
-    //global $CFG;
-    
-    // UofR Hack - cunnintr
-	// Notify if forum is closed
+function kalvidres_cm_info_dynamic(cm_info $cm) {
+	
     global $CFG, $DB, $OUTPUT, $USER;
     
     $mediaid = $cm->instance;
@@ -208,13 +208,14 @@ function kalvidres_cm_info_view(cm_info $cm) {
 	$media_entry = $DB->get_record('kalvidres', array('id' => $mediaid));
    	
 	$out = '';
-	
+	/*
 	if (!empty($media_entry->intro)) {
 		$attr = array('class'=>'no-overflow');
 		$out .= html_writer::start_tag('div',$attr);
 		$out .= format_module_intro('kalvidres', $media_entry, $cm->id, false);
 		$out .= html_writer::end_tag('div');
 	}
+	*/
     //$out = '{'.print_r($entry,1).'}';
     
     //if (!empty($this->current->entry_id)) {
@@ -225,43 +226,53 @@ function kalvidres_cm_info_view(cm_info $cm) {
 
 //$out = '{'.print_r($entry_obj,1).'}';
 
-        if (isset($entry_obj->thumbnailUrl)) {
+
+
+        if (isset($entry_obj->thumbnailUrl) && $media_entry->showpreview == 1) {
             $source = $entry_obj->thumbnailUrl;
             $alt    = $entry_obj->name;
             $title  = $entry_obj->name;
 			
-			if ($media_entry->height) {
-				$height = $media_entry->height;
-			}
-			if ($media_entry->width) {
-				$width = $media_entry->width;
-			}
+						if ($media_entry->height) {
+							$height = $media_entry->height;
+						}
+						if ($media_entry->width) {
+							$width = $media_entry->width;
+						}
 
 
-    $attr = array('id' => 'video_thumbnail',
-                  'src' => $source,
-                  'alt' => $alt,
-                  'title' => $title,
-            	  'width'  => '100%'
-                  );
+					    $attr = array('id' => 'video_thumbnail',
+					                  'src' => $source,
+					                  'alt' => $alt,
+					                  'title' => $title,
+					            	  'width'  => '100%'
+					                  );
 				  
-				  if (isset($height)) {
-					  $attr['height'] = $height;
-				  }
+									  if (isset($height)) {
+										  $attr['height'] = $height;
+									  }
 				  
-				  if (isset($height)) {
-					  $attr['width'] = $width;
-				  }
-
-	$linkattr = array(
-	  'href' => $cm->url,
-	);
+									  if (isset($height)) {
+										  $attr['width'] = $width;
+									  }
+						
+										$link_url = $cm->url;
+										if ($media_entry->showpreview == 1) {
+											$link_url .= '&autoPlay='.$media_entry->showpreview;
+											$cm->set_on_click('location.href = \''.$cm->url . '&autoPlay='.$media_entry->showpreview.'\'; return false;');
+											
+											$cm->url = $cm->url . '&autoPlay=1';
+										}
+										
+						$linkattr = array(
+						  'href' => $link_url,
+						);
 				  
-	$out .= html_writer::start_tag('div');
-	$out .= html_writer::start_tag('a', $linkattr);
-    $out .= html_writer::empty_tag('img', $attr);
-	$out .= html_writer::end_tag('a');
-	$out .= html_writer::end_tag('div');
+						$out .= html_writer::start_tag('div');
+						$out .= html_writer::start_tag('a', $linkattr);
+					  $out .= html_writer::empty_tag('img', $attr);
+						$out .= html_writer::end_tag('a');
+						$out .= html_writer::end_tag('div');
 	
 	        }
 
@@ -300,14 +311,16 @@ function kalvidres_get_coursemodule_info($coursemodule) {
 	if (! $kalvidres = $DB->get_record('kalvidres', array('id' => $coursemodule->instance))) {
         return false;
     };
-    
-	$result = new cached_cm_info();
+	
+  $result = new cached_cm_info();
     $result->name = $kalvidres->name;
+		//$result->content = 'hello';
+		//die(print_r($coursemodule,1));
     if ($coursemodule->showdescription) {
-        if ($kalvidres->alwaysshowdescription) {
+        //if ($kalvidres->alwaysshowdescription) {
             // Convert intro to html. Do not filter cached version, filters run at display time.
             $result->content = format_module_intro('kalvidres', $kalvidres, $coursemodule->id, false);
-        }
+        //}
     }
     return $result;
 }

@@ -128,7 +128,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $this->standard_intro_elements();
+        $this->standard_intro_elements(get_string('description', 'assign'));
 
         if (local_kaltura_login(true, '')) {
             $mform->addElement('header', 'video', get_string('video_hdr', 'kalvidres'));
@@ -141,6 +141,9 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         } else {
             $mform->addElement('static', 'connection_fail', get_string('conn_failed_alt', 'local_kaltura'));
         }
+
+
+        $this->add_showpreview_option($mform);
 
          $mform->addElement('header', 'access', get_string('access_hdr', 'kalvidres'));
          $this->add_access_definition($mform);
@@ -184,6 +187,20 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $accessgroup[] =& $select;
     }
 
+	
+
+  /**
+   * This function add "show preview" part to module form.
+   * @param object $mform - form object.
+   */
+  private function add_showpreview_option($mform) {
+      $previewgroup = array();
+      $options = array('0' => 'No', '1' => 'Yes');
+      $select = $mform->addElement('select', 'showpreview', get_string('showpreview', 'mod_kalvidres'), $options);
+      $select->setSelected('0');
+      $accessgroup[] =& $select;
+  }
+		
     /**
      * This function add "Media" part to module form.
      * @param object $mform - form object.

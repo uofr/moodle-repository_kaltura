@@ -68,5 +68,18 @@ function xmldb_kalvidres_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2018010200, 'kalvidres');
     }
 
+    if ($oldversion < 2018050300) {
+        $table = new xmldb_table('kalvidres');
+        $field = new xmldb_field('showpreview');
+        if (!$dbman->field_exists($table, $field)) {
+             $field->set_attributes(XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'internal');
+             $field->setDefault('0');
+             $dbman->add_field($table, $field);
+        }
+
+        // Plugin kalvidres savepoint reached.
+        upgrade_mod_savepoint(true, 2018050300, 'kalvidres');
+    }
+
     return true;
 }

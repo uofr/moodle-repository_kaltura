@@ -28,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_kalvidres';
-$plugin->version = 2018010200;
+$plugin->version = 2018050301;
 $plugin->release = 'Kaltura Media Resource 1.1.0';
 $plugin->requires = 2015051100;
 $plugin->maturity = MATURITY_STABLE;

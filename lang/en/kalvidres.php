@@ -52,6 +52,7 @@ $string['media_viewed'] = 'Media viewed';
 $string['scr_loading'] = 'Loading...';
 $string['access_hdr'] = 'Access';
 $string['internal'] = 'Internal only';
+$string['showpreview'] = 'Show preview image on course page?';
 $string['kalvidres:screenrecorder'] = 'Screen recorder';
 $string['checkingforjava'] = 'Checking for Java';
 $string['javanotenabled'] = 'Failed to detect Java, please make sure you have the latest version of Java installed and enabled and then try again.';
