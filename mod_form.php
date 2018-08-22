@@ -49,7 +49,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
      * This function outputs a resource information form.
      */
     protected function definition() {
-        global $CFG, $PAGE;
+        global $CFG, $PAGE, $COURSE;
 
         $kaltura = new kaltura_connection();
         $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
@@ -72,7 +72,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         // Check if connection to Kaltura can be established.
         if ($connection) {
             $PAGE->requires->js_call_amd('local_kaltura/simpleselector', 'init',
-                                         array($CFG->wwwroot . "/local/kaltura/simple_selector.php",
+                                         array($CFG->wwwroot . "/local/kaltura/simple_selector.php?course=".$COURSE->id,
                                                get_string('replace_media', 'mod_kalvidres')));
             $PAGE->requires->js_call_amd('local_kaltura/properties', 'init',
                                          array($CFG->wwwroot . "/local/kaltura/media_properties.php"));
@@ -216,7 +216,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
             $prop = array('style' => 'display:none;');
         }
 
-		$mediagrouplabel = (!empty($entry_id)) ? 'replace_media' : 'add_video';
+		$mediagrouplabel = (!empty($entry_id)) ? 'replace_media' : 'media_select';
 
         $mediagroup = array();
         $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'), array());
@@ -292,8 +292,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $output = html_writer::tag('div', '', $attr);
 
         $source = $CFG->wwwroot . '/local/kaltura/pix/vidThumb.png';;
-        $alt    = get_string('add_video', 'kalvidres');
-        $title  = get_string('add_video', 'kalvidres');
+        $alt    = get_string('media_select', 'kalvidres');
+        $title  = get_string('media_select', 'kalvidres');
 
         if (!empty($entry_id)) {
 			$entries = new KalturaStaticEntries();
@@ -476,8 +476,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
                 if ($data instanceof MoodleQuickForm_group) {
 
                     foreach ($data->_elements as $key2 => $data2) {
-                        if (0 == strcmp('add_video', $data2->_attributes['name'])) {
-                            $mform->_elements[$key]->_elements[$key2]->setValue(get_string('replace_video', 'kalvidres'));
+                        if (0 == strcmp('media_select', $data2->_attributes['name'])) {
+                            $mform->_elements[$key]->_elements[$key2]->setValue(get_string('replace_media', 'kalvidres'));
                             break;
                         }
 
