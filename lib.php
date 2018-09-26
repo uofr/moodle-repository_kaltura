@@ -184,6 +184,8 @@ function kalvidres_supports($feature) {
             return true;
         case FEATURE_MOD_INTRO:
             return true;
+        case FEATURE_SHOW_DESCRIPTION:        
+						return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
             return false;
         case FEATURE_GRADE_HAS_GRADE:
@@ -192,8 +194,6 @@ function kalvidres_supports($feature) {
             return false;
         case FEATURE_BACKUP_MOODLE2:
             return true;
-        case FEATURE_SHOW_DESCRIPTION:        
-						return true;
         default:
             return null;
     }
@@ -241,38 +241,62 @@ function kalvidres_cm_info_dynamic(cm_info $cm) {
 						}
 
 
-					    $attr = array('id' => 'video_thumbnail',
-					                  'src' => $source,
+					    $attr = array('src' => $source,
 					                  'alt' => $alt,
 					                  'title' => $title,
 					            	  'width'  => '100%'
 					                  );
-				  
+											/*			
 									  if (isset($height)) {
 										  $attr['height'] = $height;
 									  }
 				  
 									  if (isset($height)) {
 										  $attr['width'] = $width;
-									  }
+									  }*/
 						
 										$link_url = $cm->url;
 										if ($media_entry->showpreview == 1) {
 											$link_url .= '&autoPlay='.$media_entry->showpreview;
 											$cm->set_on_click('location.href = \''.$cm->url . '&autoPlay='.$media_entry->showpreview.'\'; return false;');
 											
-											$cm->url = $cm->url . '&autoPlay=1';
+											//$cm->url = $cm->url . '&autoPlay=1';
 										}
 										
 						$linkattr = array(
 						  'href' => $link_url,
 						);
-				  
-						$out .= html_writer::start_tag('div');
+				    
+						$divattr = array('class' => 'kalvidres_thumbnail');
+						
+						$out .= html_writer::start_tag('div',$divattr);
 						$out .= html_writer::start_tag('a', $linkattr);
+						//span for the play arrow
+					  $out .= html_writer::start_tag('span');
+					  $out .= html_writer::end_tag('span');
+						
 					  $out .= html_writer::empty_tag('img', $attr);
+						//$out .= html_writer::end_tag('a');
+						
+						$title_attr = array();
+						
+						$out .= html_writer::empty_tag('br');
+						
+						
+						$out .= html_writer::start_tag('h4');
+						//$out .= html_writer::start_tag('a', $linkattr);
+						$out .=	$media_entry->name;
+						$out .= html_writer::end_tag('h4');
 						$out .= html_writer::end_tag('a');
+						
+						if ($cm->showdescription) $out .= $media_entry->intro;
+						//$out .= html_writer::end_tag('div');
+						
 						$out .= html_writer::end_tag('div');
+						
+						//$out .= '<hr />'.$cm->showdescription;
+						
+						//$out .= '<pre>'.print_r($media_entry,1).'</pre>';
 	
 	        }
 
@@ -282,7 +306,11 @@ function kalvidres_cm_info_dynamic(cm_info $cm) {
 	
 	//$out .= '|'.print_r($mediaid,1).'|';   
     
-    if (!empty($out)) $cm->set_content($out); // UofR Hack
+    if (!empty($out)) {
+			// if we're showing the preview, hide the activity icon and description
+			if ($media_entry->showpreview == 1) $cm->set_no_view_link();
+    	$cm->set_content($out);
+    } // UofR Hack
     
 }
 
