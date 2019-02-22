@@ -53,6 +53,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $kaltura = new kaltura_connection();
         $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
+        $renderer = $renderer = $PAGE->get_renderer('local_kaltura');
 
         $loginsession = '';
 
@@ -71,11 +72,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         // Check if connection to Kaltura can be established.
         if ($connection) {
-            $PAGE->requires->js_call_amd('local_kaltura/simpleselector', 'init',
-                                         array($CFG->wwwroot . "/local/kaltura/simple_selector.php?course=".$COURSE->id,
-                                               get_string('replace_media', 'mod_kalvidres')));
-            $PAGE->requires->js_call_amd('local_kaltura/properties', 'init',
-                                         array($CFG->wwwroot . "/local/kaltura/media_properties.php"));
+            // $PAGE->requires->js_call_amd('local_kaltura/properties', 'init', array($CFG->wwwroot . "/local/kaltura/media_properties.php"));
             $uiconf_id = local_kaltura_get_player_uiconf('player_resource');
         }
 
@@ -86,6 +83,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         }
 
         $mform =& $this->_form;
+
+        $mform->addElement('html', $renderer->create_video_selector_modal($CFG->wwwroot . "/local/kaltura/simple_selector.php?course=".$COURSE->id));
 
         /* Hidden fields */
         $attr = array('id' => 'entry_id');
@@ -145,8 +144,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $this->add_showpreview_option($mform);
 
-         $mform->addElement('header', 'access', get_string('access_hdr', 'kalvidres'));
-         $this->add_access_definition($mform);
+        $mform->addElement('header', 'access', get_string('access_hdr', 'kalvidres'));
+        $this->add_access_definition($mform);
 
         $this->standard_coursemodule_elements();
 
@@ -219,7 +218,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 		$mediagrouplabel = (!empty($entry_id)) ? 'replace_media' : 'media_select';
 
         $mediagroup = array();
-        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'), array());
+        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'), array('data-toggle' => 'modal', 'data-target' => '#video_selector_modal'));
 
         $prop = array();
 
