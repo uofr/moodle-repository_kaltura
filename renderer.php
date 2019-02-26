@@ -107,7 +107,7 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
                 $markup = local_kaltura_create_image_markup($entry_obj, $kalvidres->name, $theme,
                                                             KALTURA_IMAGE_DESKTOP_WIDTH, KALTURA_IMAGE_DESKTOP_HEIGHT);
             } else {
-                $entry_obj->width = 'auto';
+                $entry_obj->width = $kalvidres->width;
                 $entry_obj->height = $kalvidres->height;
 								
 								$doShowPreview = ($doAutoPlay == 1 && $kalvidres->showpreview) ? 1 : 0;
@@ -119,8 +119,12 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
                 }
             }
 
-            $attr = array('class'=>'col-12 col-md-10 col-lg-4 mx-auto', 'style'=>'text-align: center');
-            $output .= html_writer::tag('div', $markup, $attr);
+            $output .= html_writer::start_tag('div', ['class' => 'd-flex']);
+
+            $output .= html_writer::tag('div class="flex-grow"', $markup);
+
+            $output .= html_writer::end_tag('div');
+
             
         } else {
             $output = get_string('video_converting', 'kalvidres');

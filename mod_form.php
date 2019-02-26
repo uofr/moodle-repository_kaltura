@@ -53,7 +53,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $kaltura = new kaltura_connection();
         $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
-        $renderer = $renderer = $PAGE->get_renderer('local_kaltura');
+        $renderer = $PAGE->get_renderer('local_kaltura');
 
         $loginsession = '';
 
@@ -84,7 +84,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $mform =& $this->_form;
 
-        $mform->addElement('html', $renderer->create_video_selector_modal($CFG->wwwroot . "/local/kaltura/simple_selector.php?course=".$COURSE->id));
+        $mform->addElement('html', $renderer->create_video_selector_modal());
+        $mform->addElement('html', $renderer->create_video_properties_modal());
 
         /* Hidden fields */
         $attr = array('id' => 'entry_id');
@@ -220,14 +221,13 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $mediagroup = array();
         $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'), array('data-toggle' => 'modal', 'data-target' => '#video_selector_modal'));
 
-        $prop = array();
+        $prop = array('data-toggle' => 'modal', 'data-target' => '#video_properties_modal');
 
         if (empty($this->current->entry_id)) {
             $prop += array('style' => 'visibility: hidden;');
         }
 
-        $mediagroup[] =& $mform->createElement('button', 'media_properties',
-                                               get_string('media_properties', 'local_kaltura'), $prop);
+        $mediagroup[] =& $mform->createElement('button', 'media_properties', get_string('media_properties', 'local_kaltura'), $prop);
 
         $mform->addGroup($mediagroup, 'media_group', '&nbsp;', '&nbsp;', false);
 

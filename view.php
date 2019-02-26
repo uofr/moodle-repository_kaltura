@@ -166,15 +166,14 @@ if ($kalvidres->internal == 1 and !local_kaltura_check_internal($clientipaddress
 
 	        		if (!empty($category) && $enabled) {
 	            		repository_kaltura_add_video_course_reference($connection, $course->id, array($kalvidres->entry_id));
-	        		}
-							//die(print_r($doAutoPlay,1));
-							echo $renderer->embed_media($kalvidres);
+                    }
+                    echo '<div id="thing">Thing</div>';
+                    echo $renderer->embed_media($kalvidres);
                 
             }
         } catch (Exception $ex) {
             echo '<div class="alert alert-warning"><p>';
                         echo 'Entry Id <b>' . $kalvidres->entry_id. '</b> could not be found.';
-                        //echo 'This media may have been deleted.';
                         echo '</p></div>';
         }
     }
