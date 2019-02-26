@@ -63,6 +63,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $PAGE->requires->css('/mod/kalvidres/css/kalmediares.css');
         $PAGE->requires->css('/local/kaltura/css/simple_selector.css');
+        $PAGE->requires->js_call_amd('local_kaltura/properties', 'init');
 
         /*
          * This line is needed to avoid a PHP warning when the form is submitted.

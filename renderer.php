@@ -119,7 +119,7 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
                 }
             }
 
-            $output .= html_writer::start_tag('div', ['class' => 'd-flex']);
+            $output .= html_writer::start_tag('div', ['class' => 'flex-video']);
 
             $output .= html_writer::tag('div class="flex-grow"', $markup);
 
