@@ -68,4 +68,5 @@ $string['totalplays'] = 'Total plays';
 $string['totalviews'] = 'Total views';
 $string['no_student'] = 'There are no students in this course.';
 $string['not_viewed'] = 'No students have viewed this media.';
+$string['invalid_size'] = 'Invalid player dimensions. Width and height must be between 200 and 1280.';
 

@@ -494,4 +494,19 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
     }
 
+    public function validation($data, $files) {
+        $errors = array();
+        $playerWidth = intval($data['width']);
+        $playerHeight = intval($data['height']);
+        if ($playerWidth < 200 || $playerHeight < 200) {
+            $errors['kalvidres_invalid_size'] = get_string('invalid_size', 'mod_kalvidres');
+            print_error('invalid_size', 'kalvidres');
+        }
+        else if ($playerWidth > 1280 || $playerHeight > 1280) {
+            $errors['kalvidres_invalid_size'] = get_string('invalid_size', 'mod_kalvidres');
+            print_error('invalid_size', 'kalvidres');
+        }
+        return $errors;
+    }
+
 }
