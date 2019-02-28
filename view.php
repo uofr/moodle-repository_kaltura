@@ -167,7 +167,6 @@ if ($kalvidres->internal == 1 and !local_kaltura_check_internal($clientipaddress
 	        		if (!empty($category) && $enabled) {
 	            		repository_kaltura_add_video_course_reference($connection, $course->id, array($kalvidres->entry_id));
                     }
-                    echo '<div id="thing">Thing</div>';
                     echo $renderer->embed_media($kalvidres);
                 
             }
