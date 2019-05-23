@@ -1262,7 +1262,7 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
             $search_name = '';
             
                                       
-            $search_results = repository_kaltura_search_own_videos($connection, $search_name, $search_name, $page);                      
+            $search_results = repository_kaltura_get_own_videos($connection);                      
         }
 
         $uri        = local_kaltura_get_host();
@@ -1351,6 +1351,21 @@ function repository_kaltura_search_own_videos($connection, $name, $tags, $page_i
     return $results;
 
 }
+
+/**
+ * This function retrieves all of the videos uploaded by the current user without pagination.
+ * 
+ * @param obj $connection Kaltura connection object.
+ */
+function repository_kaltura_get_own_videos($connection) {
+    global $USER;
+    $results = array();
+    $filter = repository_kaltura_create_media_filter('', '', ''); // empty filter
+    $filter->userIdEqual = $USER->username; // filter by current user
+    $results = $connection->media->listAction($filter);
+    return $results;
+}
+
 
 
 /**

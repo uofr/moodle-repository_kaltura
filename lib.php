@@ -330,7 +330,7 @@ class repository_kaltura extends repository {
         // a root directory with a system and a shared folder.  Below those folders will be course
         // folders.
         if (!empty($system_access) && !empty($shared_access)) {
-
+            
             $ret = repository_kaltura_get_system_shared_listing($ret, $path, $system_access, $shared_access, $page);
 
         } else if (!empty($system_access)) {
