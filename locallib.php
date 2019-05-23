@@ -1248,7 +1248,14 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
 
             $course = array($course->id => $course);
 
-            $search_results = repository_kaltura_search_videos($connection, '', '', $course, $page, $type);
+            $filter = repository_kaltura_create_media_filter('', '');
+
+            if ($type === 'shared') {
+                $search_results = repository_kaltura_retrieve_shared_videos($connection, $filter, $courses, $page, false);
+            }
+            else if ($type === 'used') {
+                $search_results = repository_kaltura_retrieve_used_videos($connection, $filter, $courses, $page, false);
+            }
         
         } else {
             
@@ -1258,10 +1265,7 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
             // Build navigation path
             $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
             $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
-            
-            $search_name = '';
-            
-                                      
+                           
             $search_results = repository_kaltura_get_own_videos($connection);                      
         }
 
@@ -1433,12 +1437,23 @@ function repository_kaltura_search_videos($connection, $name, $tags, $courses = 
                 break;
         }
     } elseif (0 == strcmp('site_shared', $search_for)) {
-
+        
         $results = repository_kaltura_retrieve_site_shared_videos($connection, $filter, $page_index);
     }
 
     return $results;
 
+}
+
+/**
+ * @param obj $connection - Kaltura connection object.
+ * @param array $courses - An array of courses.
+ */
+function repository_kaltura_get_shared_videos($connection, $courses) {
+    $results = array();
+
+    
+    return $results;
 }
 
 /**
@@ -1492,8 +1507,9 @@ function repository_kaltura_retrieve_site_shared_videos($connection, $filter, $p
  * @param obj - KalturaMediaEntryFilter @see repository_kaltura_create_media_filter()
  * @param array - an array of Moodle courses to filter videos results by
  * @param int - current page index
+ * @param bool $pagination - Whether or not the results should be paginated.
  */
-function repository_kaltura_retrieve_used_videos($connection, $filter, $courses, $page_index) {
+function repository_kaltura_retrieve_used_videos($connection, $filter, $courses, $page_index, $pagination = true) {
 
     $results = array();
     $categories   = '';
@@ -1507,8 +1523,13 @@ function repository_kaltura_retrieve_used_videos($connection, $filter, $courses,
 
     $filter->categoriesMatchOr = $categories;
 
-    // Create pager object
-    $pager = repository_kaltura_create_pager($page_index);
+    if ($pagination) {
+        // Create pager object
+        $pager = repository_kaltura_create_pager($page_index);
+    }
+    else {
+        $pager = null;
+    }
 
     // Get results
     $results = $connection->media->listAction($filter, $pager);
@@ -1524,8 +1545,9 @@ function repository_kaltura_retrieve_used_videos($connection, $filter, $courses,
  * @param array - an array of Moodle courses (keys are course ids) to filter
  * videos results by
  * @param int - current page index
+ * @param bool $pagination - Whether or not the results should be paginated
  */
-function repository_kaltura_retrieve_shared_videos($connection, $filter, $courses, $page_index) {
+function repository_kaltura_retrieve_shared_videos($connection, $filter, $courses, $page_index, $pagination = true) {
 
     $results = array();
 
@@ -1554,8 +1576,13 @@ function repository_kaltura_retrieve_shared_videos($connection, $filter, $course
         $filter->advancedSearch = $adv_filter;
     }
 
-    // Create pager object
-    $pager = repository_kaltura_create_pager($page_index);
+    if ($pagination) {
+        // Create pager object
+        $pager = repository_kaltura_create_pager($page_index);
+    }
+    else {
+        $pager = null;
+    }
 
     // Get results
     $results = $connection->media->listAction($filter, $pager);
