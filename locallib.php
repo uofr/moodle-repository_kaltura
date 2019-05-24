@@ -1160,7 +1160,7 @@ function repository_kaltura_get_site_video_listing($path, $type_path, $page) {
  */
 function repository_kaltura_get_course_video_listing($courses, $path, $type_path = REPOSITORY_KALTURA_SHARED_PATH, $page = 1) {
 
-    global $DB,$USER,$SESSION;
+    global $DB;
 
     $newpath     = array();
     $listing     = array();
@@ -1238,10 +1238,10 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
             $filter = repository_kaltura_create_media_filter('', '');
 
             if ($type === 'shared') {
-                $search_results = repository_kaltura_retrieve_shared_videos($connection, $filter, $courses, $page, false);
+                $search_results = repository_kaltura_retrieve_shared_videos($connection, $filter, $course, $page, false);
             }
             else if ($type === 'used') {
-                $search_results = repository_kaltura_retrieve_used_videos($connection, $filter, $courses, $page, false);
+                $search_results = repository_kaltura_retrieve_used_videos($connection, $filter, $course, $page, false);
             }
         
         } else {
@@ -1433,17 +1433,6 @@ function repository_kaltura_search_videos($connection, $name, $tags, $courses = 
 }
 
 /**
- * @param obj $connection - Kaltura connection object.
- * @param array $courses - An array of courses.
- */
-function repository_kaltura_get_shared_videos($connection, $courses) {
-    $results = array();
-
-    
-    return $results;
-}
-
-/**
  * This function retrieves videos that have been shared with the site
  *
  * @param obj - Kaltura connection object
@@ -1604,7 +1593,7 @@ function repository_kaltura_create_course_shared_adv_search_filter($courses, $xp
     foreach ($courses as $courseid => $data) {
 
         // Create Metadata filter
-        $search_condition[] = repository_kaltura_create_metadata_filter($courseid, $xpath);
+        $search_condition[$courseid] = repository_kaltura_create_metadata_filter($courseid, $xpath);
     }
 
     if (!empty($search_condition)) {

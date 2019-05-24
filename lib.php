@@ -289,9 +289,8 @@ class repository_kaltura extends repository {
     }
 
     public function get_listing($path='', $page = 1) {
-        global $USER, $DB, $PAGE;
+        global $PAGE;
 
-        $course_access = array();
         $ret = array();
 
         $system_access = repository_kaltura_get_course_access_list('repository/kaltura:systemvisibility');
