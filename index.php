@@ -28,6 +28,9 @@ require_once(dirname(__FILE__) . '/renderable.php');
 
 defined('MOODLE_INTERNAL') || die();
 
+header('Access-Control-Allow-Origin: *');
+header('Cache-Control: no-cache');
+
 $id = required_param('id', PARAM_INT); // Course ID.
 
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);

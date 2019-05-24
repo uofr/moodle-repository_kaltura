@@ -30,6 +30,9 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php'
 
 defined('MOODLE_INTERNAL') || die();
 
+header('Access-Control-Allow-Origin: *');
+header('Cache-Control: no-cache');
+
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
 require_login();

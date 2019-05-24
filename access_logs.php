@@ -30,6 +30,9 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php'
 
 defined('MOODLE_INTERNAL') || die();
 
+header('Access-Control-Allow-Origin: *');
+header('Cache-Control: no-cache');
+
 global $SESSION, $CFG, $USER, $COURSE, $DB;
 
 $id = optional_param('id', 0, PARAM_INT);                // Course Module ID.
@@ -72,8 +75,6 @@ $PAGE->set_url('/mod/kalvidres/access_logs.php', array('id' => $id, 'sort' => $s
 $PAGE->set_title(get_string('access_logs', 'kalvidres') . ':' . format_string($kalvidres->name));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_course($course);
-
-require_login();
 
 $coursenode = $PAGE->navigation->find($id, navigation_node::TYPE_ACTIVITY);
 $thingnode = $coursenode->add(get_string('access_logs', 'kalvidres'),
