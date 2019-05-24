@@ -1129,11 +1129,8 @@ function repository_kaltura_get_site_video_listing($path, $type_path, $page) {
     $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
     $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
 
-    $empty_list = array();
-
-    $search_results = repository_kaltura_search_videos($connection, '', '',
-                                    $empty_list, $page,
-                                    $type);
+    $filter = repository_kaltura_create_media_filter('', '');
+    $search_results = repository_kaltura_retrieve_site_shared_videos($connection, $filter, $page, false);
 
     $uri         = local_kaltura_get_host();
     $uri         = rtrim($uri, '/');
@@ -1462,8 +1459,9 @@ function repository_kaltura_get_shared_videos($connection, $courses) {
  * @param obj - Kaltura connection object
  * @param obj - KalturaMediaEntryFilter @see repository_kaltura_create_media_filter()
  * @param int - current page index
+ * @param bool $pagination - Whether or not to page the results.
  */
-function repository_kaltura_retrieve_site_shared_videos($connection, $filter, $page_index) {
+function repository_kaltura_retrieve_site_shared_videos($connection, $filter, $page_index, $paginaion = true) {
     $results = array();
 
     // Get metadata profile id
@@ -1491,8 +1489,14 @@ function repository_kaltura_retrieve_site_shared_videos($connection, $filter, $p
         $filter->advancedSearch = $adv_filter;
     }
 
-    // Create pager object
-    $pager = repository_kaltura_create_pager($page_index);
+    if ($paginaion) {
+        // Create pager object
+        $pager = repository_kaltura_create_pager($page_index);
+    }
+    else {
+        $pager = null;
+    }
+   
 
     // Get results
     $results = $connection->media->listAction($filter, $pager);

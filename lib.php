@@ -25,25 +25,33 @@ require_once($CFG->dirroot.'/repository/kaltura/locallib.php');
 
 /** The block of code below is only executed for MOODLE 2.3 or higher */
 class repository_kaltura extends repository {
+
     var $sort;
 
     /** @var string $searchname name of the media file */
     var $searchname         = '';
+
     /** @var string $searchtags tag name used in the media file */
     var $searchtags         = '';
+
     /** @var string $searchcoursefilter course name filter */
     var $searchcoursefilter = '';
+
     /** @var string $searchcoursename name of the course */
     var $searchcoursename   = '';
+
     /** @var string $searchfor search for videos shared or used in course */
     var $searchfor          = '';
 
     /** @var int $pagesize number of items to display on a single page */
     private static $pagesize        = 0;
+
     /** @var string $rootcategory the kaltura root category path */
     private static $rootcategory    = null;
+
     /** @var int $rootcategoryid the kaltura root category id */
     private static $rootcategoryid  = null;
+
     /** @var boot $rootcatexists flag denoting whether the root category exists or not */
     private static $rootcatexists   = false;
 
@@ -107,7 +115,6 @@ class repository_kaltura extends repository {
             }
 
         } catch (Exception $exp) {
-            //$courseid = get_courseid_from_context($PAGE->context);
             $context = $PAGE->context;
             list($context, $course, $cm) = get_context_info_array($context->id);
             
@@ -117,8 +124,7 @@ class repository_kaltura extends repository {
                 $courseid = 1;
             }
 
-            //add_to_log($courseid, 'repository_kaltura', 'Error while initializing constructor', '', $exp->getMessage());
-                            debugging('[repository_kaltura] Error while initializing constructor: '.$exp->getMessage().' in course: '.$courseid, DEBUG_DEVELOPER);
+            debugging('[repository_kaltura] Error while initializing constructor: '.$exp->getMessage().' in course: '.$courseid, DEBUG_DEVELOPER);
         }
 
     }
@@ -295,7 +301,6 @@ class repository_kaltura extends repository {
         $kaltura = new kaltura_connection();
         $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
 
-        //$courseid = get_courseid_from_context($this->context);
         $context = $PAGE->context;
         list($context, $course, $cm) = get_context_info_array($context->id);
         
@@ -323,7 +328,7 @@ class repository_kaltura extends repository {
 
         $ret['nologin'] = true;
         $ret['dynload'] = true;
-        $ret['norefresh'] = true;
+        $ret['norefresh'] = false;
         $ret['nosearch'] = false; // See print_search() for search form
 
         // If the user has both system and shared access to courses then their view will contain
@@ -476,13 +481,7 @@ class repository_kaltura extends repository {
                         'style' => 'white-space: nowrap;');
 
         $str = html_writer::tag('div', $str, $param);
-        /*
-        // Print search link
-        $param = array('href' => '#',
-                        'onclick' => repository_kaltura_print_search_form_javascript());
-        $search_text_link = get_string('keyword', 'repository_kaltura');
-        $str = html_writer::tag('a', $search_text_link, $param) . '<br />' . $str;
-        */
+       
         return $str;
     }
 
@@ -623,4 +622,5 @@ class repository_kaltura extends repository {
     function category_tree() {
         return array();
     }
+
 }
