@@ -1141,16 +1141,6 @@ function repository_kaltura_get_site_video_listing($path, $type_path, $page) {
     $ret['path'] = $newpath;
     $ret['list'] = $listing;
 
-
-    if (!empty($search_results) && $search_results->totalCount > $page_size) {
-
-        $ret['page'] = $page;
-        $ret['pages'] = ceil($search_results->totalCount / $page_size);
-        $ret['total'] = $search_results->totalCount;
-        $ret['perpage'] = (int) $page_size;
-
-    }
-
     return $ret;
 }
 
