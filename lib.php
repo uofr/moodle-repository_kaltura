@@ -47,8 +47,10 @@ function kalvidres_add_instance($kalvidres) {
     global $DB;
 
     $kalvidres->timecreated = time();
-
     $kalvidres->id =  $DB->insert_record('kalvidres', $kalvidres);
+
+    $completiontimeexpected = !empty($kalvidres->completionexpected) ? $kalvidres->completionexpected : null;
+    \core_completion\api::update_completion_date_event($kalvidres->coursemodule, 'kalvidres', $kalvidres->id, $completiontimeexpected);
 
     return $kalvidres->id;
 }
@@ -68,6 +70,9 @@ function kalvidres_update_instance($kalvidres) {
     $kalvidres->id = $kalvidres->instance;
 
     $updated = $DB->update_record('kalvidres', $kalvidres);
+
+    $completiontimeexpected = !empty($kalvidres->completionexpected) ? $kalvidres->completionexpected : null;
+    \core_completion\api::update_completion_date_event($kalvidres->coursemodule, 'kalvidres', $kalvidres->id, $completiontimeexpected);
 
     return $updated;
 }
@@ -182,7 +187,7 @@ function kalvidres_supports($feature) {
             return true;
         case FEATURE_MOD_INTRO:
             return true;
-        case FEATURE_SHOW_DESCRIPTION:        
+        case FEATURE_SHOW_DESCRIPTION:
 			return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
             return true;
@@ -325,7 +330,7 @@ function kalvidres_cm_info_dynamic(cm_info $cm) {
  */
 function kalvidres_get_coursemodule_info($coursemodule) {
     global $CFG, $DB;
-	
+
 	/*
     $dbparams = array('id'=>$coursemodule->instance);
     $fields = 'id, name, alwaysshowdescription, allowsubmissionsfromdate, intro, introformat';
@@ -333,11 +338,11 @@ function kalvidres_get_coursemodule_info($coursemodule) {
         return false;
     }
 	*/
-	
+
 	if (! $kalvidres = $DB->get_record('kalvidres', array('id' => $coursemodule->instance))) {
         return false;
     };
-	
+
   $result = new cached_cm_info();
     $result->name = $kalvidres->name;
 		//$result->content = 'hello';
@@ -349,4 +354,40 @@ function kalvidres_get_coursemodule_info($coursemodule) {
         //}
     }
     return $result;
+}
+
+/**
+ * This function receives a calendar event and returns the action associated with it, or null if there is none.
+ *
+ * This is used by block_myoverview in order to display the event appropriately. If null is returned then the event
+ * is not displayed on the block.
+ *
+ * @param calendar_event $event
+ * @param \core_calendar\action_factory $factory
+ * @param int $userid ID override for calendar events
+ * @return \core_calendar\local\event\entities\action_interface|null
+ */
+function mod_kalvidres_core_calendar_provide_event_action(calendar_event $event, \core_calendar\action_factory $factory, $userid = 0) {
+
+    global $USER;
+    if (empty($userid)) {
+        $userid = $USER->id;
+    }
+
+    $cm = get_fast_modinfo($event->courseid, $userid)->instances['kalvidres'][$event->instance];
+
+    $completion = new \completion_info($cm->get_course());
+
+    $completiondata = $completion->get_data($cm, false, $userid);
+
+    if ($completiondata->completionstate != COMPLETION_INCOMPLETE) {
+        return null;
+    }
+
+    return $factory->create_instance(
+        get_string('view'),
+        new \moodle_url('/mod/url/kalvidres.php', ['id' => $cm->id]),
+        1,
+        true
+    );
 }
