@@ -92,6 +92,9 @@ function kalvidres_delete_instance($id) {
         return false;
     }
 
+    $cm = get_coursemodule_from_instance('kalvidres', $id);
+    \core_completion\api::update_completion_date_event($cm->id, 'kalvidres', $id, null);
+
     $DB->delete_records('kalvidres', array('id' => $kalvidres->id));
 
     return true;
