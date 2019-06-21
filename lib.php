@@ -41,7 +41,7 @@ defined('MOODLE_INTERNAL') || die();
  * of the new instance.
  *
  * @param object $kalvidres An object from the form in mod_form.php
- * @return int The id of the newly inserted kalvidassign record
+ * @return int The id of the newly inserted kalvidres record
  */
 function kalvidres_add_instance($kalvidres) {
     global $DB;
