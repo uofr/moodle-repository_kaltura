@@ -52,7 +52,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
      * This function outputs a resource information form.
      */
     protected function definition() {
-        global $CFG, $PAGE, $COURSE;
+        global $CFG, $PAGE;
 
         $kaltura = new kaltura_connection();
         $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
@@ -87,9 +87,6 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         }
 
         $mform =& $this->_form;
-
-        $mform->addElement('html', $renderer->create_video_selector_modal());
-        $mform->addElement('html', $renderer->create_video_properties_modal());
 
         /* Hidden fields */
         $attr = array('id' => 'entry_id');
@@ -136,7 +133,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         if (local_kaltura_login(true, '')) {
             $mform->addElement('header', 'video', get_string('video_hdr', 'kalvidres'));
-			
+
 			if (empty($this->current->entry_id)) {
                 $this->add_media_definition($mform, null);
             } else {
@@ -191,8 +188,6 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $accessgroup[] =& $select;
     }
 
-	
-
   /**
    * This function add "show preview" part to module form.
    * @param object $mform - form object.
@@ -204,7 +199,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
       $select->setSelected('0');
       $accessgroup[] =& $select;
   }
-		
+
     /**
      * This function add "Media" part to module form.
      * @param object $mform - form object.
@@ -301,7 +296,6 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         if (!empty($entry_id)) {
 			$entries = new KalturaStaticEntries();
             $entryobj = KalturaStaticEntries::getEntry($entry_id, null, false);
-			//die('entryobj: '.print_r($entryobj,1).'|'.$entry_id);
             if (isset($entryobj->thumbnailUrl)) {
                 $source = $entryobj->thumbnailUrl;
                 $alt    = $entryobj->name;
@@ -490,11 +484,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
                         }
                     }
                 }
-
             }
-
         }
-
     }
 
     public function validation($data, $files) {
