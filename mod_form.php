@@ -66,7 +66,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $PAGE->requires->css('/mod/kalvidres/css/kalmediares.css');
         $PAGE->requires->css('/local/kaltura/css/simple_selector.css');
-        $PAGE->requires->js_call_amd('local_kaltura/properties', 'init');
+        $PAGE->requires->js_call_amd('local_kaltura/media_modal', 'init');
 
         /*
          * This line is needed to avoid a PHP warning when the form is submitted.
@@ -218,7 +218,9 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 		$mediagrouplabel = (!empty($entry_id)) ? 'replace_media' : 'media_select';
 
         $mediagroup = array();
-        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'), array('data-toggle' => 'modal', 'data-target' => '#video_selector_modal'));
+        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'));
+        $mediagroup[] =& $mform->createElement('button', 'upload_media', get_string('upload', 'mod_kalvidres'));
+        $mediagroup[] =& $mform->createElement('button', 'record_media', get_string('record', 'mod_kalvidres'));
 
         $prop = array('data-toggle' => 'modal', 'data-target' => '#video_properties_modal');
 
