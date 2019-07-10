@@ -176,15 +176,21 @@ class mod_kalvidres_mod_form extends moodleform_mod {
      * @param string $entry_id - id of media entry.
      */
     private function add_media_definition($mform, $entry_id) {
+        global $PAGE;
+        $local_kaltura_renderer = $PAGE->get_renderer('local_kaltura');
 
         $thumbnail = $this->get_thumbnail_markup($entry_id);
         $mform->addElement('static', 'add_media_thumb', '&nbsp;', $thumbnail);
 
+        $mform->addElement('html', $local_kaltura_renderer->create_selector_modal());
+        $mform->addElement('html', $local_kaltura_renderer->create_upload_modal());
+        $mform->addElement('html', $local_kaltura_renderer->create_record_modal());
+
 		$mediagrouplabel = (!empty($entry_id)) ? 'replace_media' : 'media_select';
         $mediagroup = array();
-        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'));
-        $mediagroup[] =& $mform->createElement('button', 'upload_media', get_string('upload', 'mod_kalvidres'));
-        $mediagroup[] =& $mform->createElement('button', 'record_media', get_string('record', 'mod_kalvidres'));
+        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#selector_modal']);
+        $mediagroup[] =& $mform->createElement('button', 'upload_media', get_string('upload', 'mod_kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#upload_modal']);
+        $mediagroup[] =& $mform->createElement('button', 'record_media', get_string('record', 'mod_kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#record_modal']);
 
         $mform->addGroup($mediagroup, 'media_group', '&nbsp;', '&nbsp;', false);
     }
