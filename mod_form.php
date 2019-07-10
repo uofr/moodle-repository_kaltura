@@ -56,17 +56,12 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $kaltura = new kaltura_connection();
         $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
-        $renderer = $PAGE->get_renderer('local_kaltura');
 
         $loginsession = '';
 
         if (!empty($connection)) {
             $loginsession = $connection->getKs();
         }
-
-        $PAGE->requires->css('/mod/kalvidres/css/kalmediares.css');
-        $PAGE->requires->css('/local/kaltura/css/simple_selector.css');
-        $PAGE->requires->js_call_amd('local_kaltura/media_modal', 'init');
 
         /*
          * This line is needed to avoid a PHP warning when the form is submitted.
@@ -76,12 +71,10 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         // Check if connection to Kaltura can be established.
         if ($connection) {
-            // $PAGE->requires->js_call_amd('local_kaltura/properties', 'init', array($CFG->wwwroot . "/local/kaltura/media_properties.php"));
             $uiconf_id = local_kaltura_get_player_uiconf('player_resource');
         }
 
         if (local_kaltura_has_mobile_flavor_enabled() && local_kaltura_get_enable_html5()) {
-
             $url = new moodle_url(local_kaltura_htm5_javascript_url($uiconf_id));
             $PAGE->requires->js($url, true);
         }
@@ -123,7 +116,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
-        } else {
+        }
+        else {
             $mform->setType('name', PARAM_CLEANHTML);
         }
 
@@ -136,44 +130,20 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
 			if (empty($this->current->entry_id)) {
                 $this->add_media_definition($mform, null);
-            } else {
+            }
+            else {
                 $this->add_media_definition($mform, $this->current->entry_id);
             }
-        } else {
+        }
+        else {
             $mform->addElement('static', 'connection_fail', get_string('conn_failed_alt', 'local_kaltura'));
         }
-
-
         $this->add_showpreview_option($mform);
 
         $mform->addElement('header', 'access', get_string('access_hdr', 'kalvidres'));
         $this->add_access_definition($mform);
-
         $this->standard_coursemodule_elements();
-
         $this->add_action_buttons();
-    }
-
-    /**
-     * This function return HTML markup for progress bar.
-     * @return string - HTML markup for progress bar.
-     */
-    private function draw_progress_bar() {
-        $attr         = array('id' => 'progress_bar');
-        $progress_bar = html_writer::tag('span', '', $attr);
-
-        $attr          = array('id' => 'slider_border');
-        $slider_border = html_writer::tag('div', $progress_bar, $attr);
-
-        $attr          = array('id' => 'loading_text');
-        $loading_text  = html_writer::tag('div', get_string('checkingforjava', 'mod_kalvidres'), $attr);
-
-        $attr   = array('id' => 'progress_bar_container',
-                        'style' => 'width:100%; padding-left:10px; padding-right:10px; visibility: hidden');
-        $output = html_writer::tag('span', $slider_border . $loading_text, $attr);
-
-        return $output;
-
     }
 
     /**
@@ -197,7 +167,7 @@ class mod_kalvidres_mod_form extends moodleform_mod {
       $options = array('0' => 'No', '1' => 'Yes');
       $select = $mform->addElement('select', 'showpreview', get_string('showpreview', 'mod_kalvidres'), $options);
       $select->setSelected('0');
-      $accessgroup[] =& $select;
+      $previewgroup[] =& $select;
   }
 
     /**
@@ -208,68 +178,15 @@ class mod_kalvidres_mod_form extends moodleform_mod {
     private function add_media_definition($mform, $entry_id) {
 
         $thumbnail = $this->get_thumbnail_markup($entry_id);
-
         $mform->addElement('static', 'add_media_thumb', '&nbsp;', $thumbnail);
 
-        if (empty($entry_id)) {
-            $prop = array('style' => 'display:none;');
-        }
-
 		$mediagrouplabel = (!empty($entry_id)) ? 'replace_media' : 'media_select';
-
         $mediagroup = array();
         $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'));
         $mediagroup[] =& $mform->createElement('button', 'upload_media', get_string('upload', 'mod_kalvidres'));
         $mediagroup[] =& $mform->createElement('button', 'record_media', get_string('record', 'mod_kalvidres'));
 
-        $prop = array('data-toggle' => 'modal', 'data-target' => '#video_properties_modal');
-
-        if (empty($this->current->entry_id)) {
-            $prop += array('style' => 'visibility: hidden;');
-        }
-
-        $mediagroup[] =& $mform->createElement('button', 'media_properties', get_string('media_properties', 'local_kaltura'), $prop);
-
         $mform->addGroup($mediagroup, 'media_group', '&nbsp;', '&nbsp;', false);
-
-    }
-
-    /**
-     * This function return HTML markup to display popup panel.
-     * @return string - HTML markup to display popup panel.
-     */
-    private function get_popup_markup() {
-
-        $output = '';
-
-        // Panel markup to set media properties.
-        $attr = array('id' => 'media_properties_panel', 'style' => 'display: none;');
-        $output .= html_writer::start_tag('div', $attr);
-
-        $attr = array('class' => 'hd');
-        $output .= html_writer::tag('div', get_string('media_prop_header', 'kalvidres'), $attr);
-
-        $attr = array('class' => 'bd');
-
-        $propertiesmarkup = $this->get_media_preferences_markup();
-
-        $output .= html_writer::tag('div', $propertiesmarkup, $attr);
-
-        $output .= html_writer::end_tag('div');
-
-        // Panel markup to preview media.
-        $attr = array('id' => 'media_preview_panel', 'style' => 'display: none;');
-        $output .= html_writer::start_tag('div', $attr);
-
-        $attr = array('class' => 'hd');
-        $output .= html_writer::tag('div', get_string('media_preview_header', 'kalvidres'), $attr);
-
-        $attr = array('class' => 'bd',
-                      'id' => 'media_preview_body');
-
-        $output .= html_writer::tag('div', '', $attr);
-
-        return $output;
     }
 
     /**
@@ -317,152 +234,6 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
     }
 
-
-    /**
-     * This function returns an array of video resource players.
-     *
-     * If the override configuration option is checked, then this function will
-     * only return a single array entry with the overridden player
-     * @return array - First element will be an array whose keys are player ids
-     * and values are player name.  Second element will be the default selected
-     * player.  The default player is determined by the Kaltura configuraiton
-     * settings (local_kaltura).
-     */
-    private function get_video_resource_players() {
-
-        // Get user's players
-        $players = local_kaltura_get_custom_players();
-
-        // Kaltura regular player selection
-        $choices = array(KALTURA_PLAYER_PLAYERREGULARDARK  => get_string('player_regular_dark', 'local_kaltura'),
-                         KALTURA_PLAYER_PLAYERREGULARLIGHT => get_string('player_regular_light', 'local_kaltura'),
-                         );
-
-        if (!empty($players)) {
-            $choices = $choices + $players;
-        }
-
-        // Set default player only if the user is adding a new activity instance
-        $default_player_id = local_kaltura_get_player_uiconf('player_resource');
-
-        // If the default player id does not exist in the list of choice
-        // then the user must be using a custom player id, add it to the list
-        if (!array_key_exists($default_player_id, $choices)) {
-            $choices = $choices + array($default_player_id => get_string('custom_player', 'kalvidres'));
-        }
-
-        // Check if player selection is globally overridden
-        if (local_kaltura_get_player_override()) {
-            return array(array( $default_player_id => $choices[$default_player_id]),
-                         $default_player_id
-                        );
-        }
-
-        return array($choices, $default_player_id);
-
-    }
-
-    /**
-     * Create player properties panel markup.  Default values are loaded from
-     * the javascript (see function "handle_cancel" in kaltura.js
-     * @return string - html markup for media preferences.
-     */
-    private function get_media_preferences_markup() {
-        $output = '';
-
-        // Display name input box.
-        $attr = array('for' => 'media_prop_name');
-        $output .= html_writer::tag('label', get_string('media_prop_name', 'kalvidres'), $attr);
-        $output .= '&nbsp;';
-
-        $attr = array('type' => 'text',
-                      'id' => 'media_prop_name',
-                      'name' => 'media_prop_name',
-                      'value' => '',
-                      'maxlength' => '100');
-        $output .= html_writer::empty_tag('input', $attr);
-        $output .= html_writer::empty_tag('br');
-
-        // Display section element for player design.
-        $attr = array('for' => 'media_prop_player');
-        $output .= html_writer::tag('label', get_string('media_prop_player', 'kalvidres'), $attr);
-        $output .= '&nbsp;';
-
-        list($options, $defaultoption) = $this->get_media_resource_players();
-
-        $attr = array('id' => 'media_prop_player');
-
-        $output .= html_writer::select($options, 'media_prop_player', $defaultoption, false, $attr);
-        $output .= html_writer::empty_tag('br');
-
-        // Display player dimensions radio button.
-        $attr = array('for' => 'media_prop_dimensions');
-        $output .= html_writer::tag('label', get_string('media_prop_dimensions', 'kalvidres'), $attr);
-        $output .= '&nbsp;';
-
-        $options = array(0 => get_string('normal', 'kalvidres'),
-                         1 => get_string('widescreen', 'kalvidres')
-                         );
-
-        $attr = array('id' => 'media_prop_dimensions');
-        $selected = !empty($defaults) ? $defaults['media_prop_dimensions'] : array();
-        $output .= html_writer::select($options, 'media_prop_dimensions', $selected, array(), $attr);
-
-        //$output .= html_writer::empty_tag('br');
-        //$output .= html_writer::empty_tag('br');
-
-        // Display player size drop down button
-        $attr = array('for' => 'vid_prop_size','disabled'=>'disabled');
-        $output .= html_writer::tag('label', get_string('vid_prop_size', 'kalvidres'), $attr);
-        //$output .= '&nbsp;';
-
-        $options = array(0 => get_string('vid_prop_size_large', 'kalvidres'),
-                         1 => get_string('vid_prop_size_small', 'kalvidres'),
-                         2 => get_string('vid_prop_size_custom', 'kalvidres')
-                         );
-
-        $attr = array('id' => 'vid_prop_size','disabled'=>'disabled');
-        $selected = !empty($defaults) ? $defaults['vid_prop_size'] : array();
-
-        $output .= html_writer::select($options, 'vid_prop_size', $selected, array(), $attr);
-
-        // Display custom player size
-        //$output .= '&nbsp;&nbsp;';
-
-        $attr = array('type' => 'text',
-                      'id' => 'vid_prop_width',
-                      'name' => 'vid_prop_width',
-                      'value' => '',
-                      'maxlength' => '3',
-                      'size' => '3',
-                      );
-        $output .= html_writer::empty_tag('input', $attr);
-
-        //$output .= '&nbsp;x&nbsp;';
-
-        $attr = array('type' => 'text',
-                      'id' => 'vid_prop_height',
-                      'name' => 'vid_prop_height',
-                      'value' => '',
-                      'maxlength' => '3',
-                      'size' => '3',
-                      );
-        $output .= html_writer::empty_tag('input', $attr);
-
-        return $output;
-    }
-
-    /**
-     * This function return media properties.
-     * @return array - media properties.
-     */
-    private function get_default_media_properties() {
-        return $properties = array('media_prop_player' => 4674741,
-                                   'media_prop_dimensions' => 0,
-                                   'media_prop_size' => 0,
-                                  );
-    }
-
     /**
      * This function changes form information after media selected.
      */
@@ -488,21 +259,6 @@ class mod_kalvidres_mod_form extends moodleform_mod {
                 }
             }
         }
-    }
-
-    public function validation($data, $files) {
-        $errors = array();
-        $playerWidth = intval($data['width']);
-        $playerHeight = intval($data['height']);
-        if ($playerWidth < 200 || $playerHeight < 200) {
-            $errors['kalvidres_invalid_size'] = get_string('invalid_size', 'mod_kalvidres');
-            print_error('invalid_size', 'kalvidres');
-        }
-        else if ($playerWidth > 1280 || $playerHeight > 1280) {
-            $errors['kalvidres_invalid_size'] = get_string('invalid_size', 'mod_kalvidres');
-            print_error('invalid_size', 'kalvidres');
-        }
-        return $errors;
     }
 
 }
