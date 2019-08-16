@@ -175,26 +175,16 @@ class mod_kalvidres_mod_form extends moodleform_mod {
      * @param string $entry_id - id of media entry.
      */
     private function add_media_definition($mform, $entry_id, $connection) {
-        global $PAGE, $USER;
+        global $PAGE;
         $local_kaltura_renderer = $PAGE->get_renderer('local_kaltura');
         $local_mymedia_renderer = $PAGE->get_renderer('local_mymedia');
-        $secret = local_kaltura_get_admin_secret();
-        $publishername = local_kaltura_get_publisher_name();
-        $partnerid = local_kaltura_get_partner_id();
-        $expiry = 21600;
-        $ks = $connection->session->start($secret, $publishername, KalturaSessionType::ADMIN, $partnerid, $expiry);
-        $server_host = local_kaltura_get_host();
-        $control = local_kaltura_get_default_access_control($connection);
-        $result = local_kaltura_get_root_category();
-        $rootpath = $result['name'];
-        $category = empty($rootpath) ? $USER->username : $rootpath . '>' . $USER->username;
 
         $thumbnail = $this->get_thumbnail_markup($entry_id);
         $mform->addElement('static', 'add_media_thumb', '&nbsp;', $thumbnail);
 
         $mform->addElement('html', $local_kaltura_renderer->create_selector_modal());
         $mform->addElement('html', $local_mymedia_renderer->render_from_template('local_mymedia/mod_progress_modal', ['back_link'=>'#']));
-        $simple_uploader = new \local_mymedia\output\simple_uploader($server_host, $ks, $category, $control->id, $USER->username, $partnerid);
+        $simple_uploader = new \local_mymedia\output\simple_uploader($connection);
         $mform->addElement('html', $local_mymedia_renderer->render_simple_upload_modal($simple_uploader));
         $mform->addElement('html', $local_mymedia_renderer->render_webcam_upload_modal($simple_uploader));
 

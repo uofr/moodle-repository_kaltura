@@ -97,7 +97,6 @@ try {
     }
 }
 catch (Exception $ex) {
-    echo $ex;
     echo '<div class="alert alert-warning"><p>';
     echo 'Entry Id <b>' . $kalvidres->entry_id. '</b> could not be found.';
     echo '</p></div>';
