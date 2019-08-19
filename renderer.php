@@ -116,9 +116,7 @@ class mod_kalvidres_renderer extends plugin_renderer_base {
                 }
             }
 
-            $output .= \html_writer::start_tag('div', ['class' => 'col-md-8']);
-            $output .= \html_writer::tag('div', $markup, ['class' => '.embed-responsive-item embed-responsive embed-responsive-16by9']);
-            $output .= \html_writer::end_tag('div');
+            $output .= \html_writer::tag('div', $markup, ['class' => 'kaltura-video embed-responsive embed-responsive-16by9']);
 
         } else {
             $output = get_string('video_converting', 'kalvidres');

@@ -187,12 +187,10 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $simple_uploader = new \local_mymedia\output\simple_uploader($connection);
         $mform->addElement('html', $local_mymedia_renderer->render_simple_upload_modal($simple_uploader));
         $mform->addElement('html', $local_mymedia_renderer->render_webcam_upload_modal($simple_uploader));
-
-		$mediagrouplabel = (!empty($entry_id)) ? 'replace_media' : 'media_select';
         $mediagroup = array();
-        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string($mediagrouplabel, 'kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#selector_modal']);
-        $mediagroup[] =& $mform->createElement('button', 'upload_media', get_string('upload', 'mod_kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#simple_upload_modal']);
-        $mediagroup[] =& $mform->createElement('button', 'record_media', get_string('record', 'mod_kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#webcam_upload_modal']);
+        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string('media_select', 'kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#selector_modal']);
+        $mediagroup[] =& $mform->createElement('button', 'upload_media', get_string('media_upload', 'mod_kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#simple_upload_modal']);
+        $mediagroup[] =& $mform->createElement('button', 'record_media', get_string('webcam_upload', 'mod_kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#webcam_upload_modal']);
 
         $mform->addGroup($mediagroup, 'media_group', '&nbsp;', '&nbsp;', false);
     }
