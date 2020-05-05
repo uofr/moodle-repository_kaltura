@@ -22,24 +22,18 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
+defined('MOODLE_INTERNAL') || die();
+
 // Because it exists (must).
 require_once(dirname(__FILE__) . '/restore_kalvidres_stepslib.php');
 
-defined('MOODLE_INTERNAL') || die();
-
-global $PAGE;
-
-$PAGE->set_url('/mod/kalvidres/backup/moodle2/restore_kalvidres_activity_task.class.php');
-
-require_login();
-
 /**
  * kalvidres restore task.
- * @package   mod_kalvidres
- * @copyright (C) 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
- * @copyright (C) 2016-2017 Yamaguchi University <info-cc@ml.cc.yamaguchi-u.ac.jp>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    mod_kalvidres
+ * @subpackage backup-moodle2
+ * @copyright  (C) 2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
+ * @copyright  (C) 2016-2020 Yamaguchi University <gh-cc@mlex.cc.yamaguchi-u.ac.jp>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_kalvidres_activity_task extends restore_activity_task {
 
@@ -54,7 +48,7 @@ class restore_kalvidres_activity_task extends restore_activity_task {
      * Define (add) particular steps this activity can have
      */
     protected function define_my_steps() {
-        // Certificate only has one structure step
+        // Certificate only has one structure step.
         $this->add_step(new restore_kalvidres_activity_structure_step('kalvidres_structure', 'kalvidres.xml'));
     }
 
@@ -116,7 +110,7 @@ class restore_kalvidres_activity_task extends restore_activity_task {
     static public function define_restore_log_rules_for_course() {
         $rules = array();
 
-        // Fix old wrong uses (missing extension)
+        // Fix old wrong uses (missing extension).
         $rules[] = new restore_log_rule('kalvidres', 'view all', 'index.php?id={course}', null);
 
         return $rules;

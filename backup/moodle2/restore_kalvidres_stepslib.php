@@ -22,19 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
-
 defined('MOODLE_INTERNAL') || die();
-
-global $PAGE;
-
-$PAGE->set_url('/mod/kalvidres/backup/moodle2/restore_kalvidres_stepslib.php');
-
-require_login();
-
-/**
- * Define all the restore steps that will be used by the restore_kalvidres_activity_task
- */
 
 /**
  * Structure step to restore one kalvidres activity.
@@ -53,9 +41,15 @@ class restore_kalvidres_activity_structure_step extends restore_activity_structu
     protected function define_structure() {
 
         $paths = array();
+        $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('kalvidres', '/activity/kalvidres');
-
+		
+		/*
+        if ($userinfo) {
+            $paths[] = new restore_path_element('kalvidres_log', '/activity/kalvidres/logs/log');
+        }
+		*/
         // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
@@ -63,7 +57,6 @@ class restore_kalvidres_activity_structure_step extends restore_activity_structu
     /**
      * Define (add) particular settings this resource can have.
      * @param object $data - array of data.
-     * @return object - kalmediaassign instance.
      */
     protected function process_kalvidres($data) {
         global $DB;
@@ -81,10 +74,27 @@ class restore_kalvidres_activity_structure_step extends restore_activity_structu
     }
 
     /**
+     * Restore kalvidres_log.
+     * @param array $data - structure defines.
+     */
+    protected function process_kalvidres_log($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+
+        $data->instanceid = $this->get_new_parentid('kalvidres');
+        $data->userid = $this->get_mappingid('user', $data->userid);
+
+        $newitemid = $DB->insert_record('kalvidres_log', $data);
+        $this->set_mapping('kalvidres_log', $oldid, $newitemid);
+    }
+
+    /**
      * Restore related files.
      */
     protected function after_execute() {
-        // Add kalvidres related files, no need to match by itemname (just internally handled context)
+        // Add kalvidres related files, no need to match by itemname (just internally handled context).
         $this->add_related_files('mod_kalvidres', 'intro', null);
     }
 }

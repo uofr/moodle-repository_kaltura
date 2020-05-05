@@ -22,19 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
-
 defined('MOODLE_INTERNAL') || die();
-
-global $PAGE;
-
-$PAGE->set_url('/mod/kalvidres/backup/moodle2/backup_kalvidres_stepslib.php');
-
-require_login();
-
-/**
- * Define all the backup steps that will be used by the backup_kalvidres_activity_task
- */
 
 /**
  * Define the complete kalvidres structure for backup, with file and id annotations.
@@ -45,21 +33,48 @@ require_login();
  */
 class backup_kalvidres_activity_structure_step extends backup_activity_structure_step {
 
-    /**
+/**
      * Define (add) particular settings this resource can have.
      * @return object - define structure.
      */
     protected function define_structure() {
 
-        // Define each element separated
+        // To know if we are including userinfo.
+        $userinfo = $this->get_setting_value('userinfo');
+
+        // Define each element separated.
         $kalvidres = new backup_nested_element('kalvidres', array('id'), array(
             'name', 'intro', 'introformat', 'entry_id', 'video_title',
             'uiconf_id', 'widescreen', 'height', 'width', 'internal', 'showpreview', 'timemodified', 'timecreated'));
 
-        // Define sources
+			/*
+        $logs = new backup_nested_element('logs');
+
+        $log = new backup_nested_element('log', array('id'), array(
+            'instanceid', 'userid', 'plays', 'views', 'first', 'last'));
+*/
+        // Build tree.
+//        $kalvidres->add_child($logs);
+//        $logs->add_child($log);
+
+        // Define sources.
         $kalvidres->set_source_table('kalvidres', array('id' => backup::VAR_ACTIVITYID));
 
-        // Return the root element, wrapped into standard activity structure
+        // All the rest of elements only happen if we are including user info.
+		/*
+        if ($userinfo) {
+            $log->set_source_table('kalvidres_log', array('instanceid' => backup::VAR_PARENTID));
+        }
+*/
+		
+        // Annotate the user id's where required.
+        //$log->annotate_ids('user', 'userid');
+
+        // Define file annotations.
+        // This file area do not have an itemdid.
+        $kalvidres->annotate_files('mod_kalvidres', 'intro', null);
+
+        // Return the root element, wrapped into standard activity structure.
         return $this->prepare_activity_structure($kalvidres);
     }
 }

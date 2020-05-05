@@ -28,13 +28,4 @@
  * existing in /backup/moodle2/backup_settingslib.php (activities section).
  */
 
-require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
-
 defined('MOODLE_INTERNAL') || die();
-
-global $PAGE;
-
-$PAGE->set_url('/mod/kalvidres/backup/moodle2/backup_kalvidres_settingslib.php');
-
-require_login();
-

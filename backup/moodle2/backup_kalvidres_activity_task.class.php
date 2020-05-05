@@ -22,19 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
-// Because it exists (must).
-require_once(dirname(__FILE__) . '/backup_kalvidres_stepslib.php');
-// Because it exists (must).
-require_once(dirname(__FILE__) . '/backup_kalvidres_settingslib.php');
-
 defined('MOODLE_INTERNAL') || die();
 
-global $PAGE;
-
-$PAGE->set_url('/mod/kalvidres/backup/moodle2/backup_kalvidres_activity_task.class.php');
-
-require_login();
+require_once($CFG->dirroot . '/mod/kalvidres/backup/moodle2/backup_kalvidres_stepslib.php');
 
 /**
  * kalvidres backup task.
@@ -44,27 +34,23 @@ require_login();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_kalvidres_activity_task extends backup_activity_task {
-
-    /**
-     * Define (add) particular settings this activity can have.
-     */
+	
     protected function define_my_settings() {
         // No particular settings for this activity.
     }
-
+	
     /**
-     * Define (add) particular steps this activity can have.
+     * Define (add) particular steps this activity can have
      */
     protected function define_my_steps() {
-        // Choice only has one structure step
         $this->add_step(new backup_kalvidres_activity_structure_step('kalvidres_structure', 'kalvidres.xml'));
     }
 
     /**
      * Code the transformations to perform in the activity in
-     * order to get transportable (encoded) links.
-     * @param string $content - link URL of content.
-     * @return string - Encoded URL of content.
+     * order to get transportable (encoded) links
+     * @param string $content
+     * @return string
      */
     static public function encode_content_links($content) {
         global $CFG;
