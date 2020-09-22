@@ -1238,10 +1238,10 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
             $filter = repository_kaltura_create_media_filter('', '');
 
             if ($type === 'shared') {
-                $search_results = repository_kaltura_retrieve_shared_videos($connection, $filter, $course, $page, false);
+                $search_results = repository_kaltura_retrieve_shared_videos($connection, $filter, $course, $page, true);
             }
             else if ($type === 'used') {
-                $search_results = repository_kaltura_retrieve_used_videos($connection, $filter, $course, $page, false);
+                $search_results = repository_kaltura_retrieve_used_videos($connection, $filter, $course, $page, true);
             }
         
         } else {
@@ -1253,7 +1253,7 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
             $newpath[] = array('name' => get_string('crumb_home', 'repository_kaltura'), 'path' => '');
             $newpath[] = array('name' => $sub_crumb, 'path' => $type_path);
                            
-            $search_results = repository_kaltura_get_own_videos($connection);                      
+            $search_results = repository_kaltura_get_own_videos($connection, $page, $page_size);                      
         }
 
         $uri        = local_kaltura_get_host();
@@ -1264,14 +1264,10 @@ function repository_kaltura_get_course_video_listing($courses, $path, $type_path
         $ret['path'] = $newpath;
         $ret['list'] = $listing;
 
-        if (!empty($search_resultst) && $search_results->totalCount > $page_size) {
-
-            $ret['page'] = $page;
-            $ret['pages'] = ceil($search_results->totalCount / $page_size);
-            $ret['total'] = $search_results->totalCount;
-            $ret['perpage'] = (int) $page_size;
-
-        }
+        $ret['page'] = $page;
+        $ret['pages'] = ceil($search_results->totalCount / $page_size);
+        $ret['total'] = $search_results->totalCount;
+        $ret['perpage'] = (int) $page_size;
 
     }
 
@@ -1348,12 +1344,16 @@ function repository_kaltura_search_own_videos($connection, $name, $tags, $page_i
  * 
  * @param obj $connection Kaltura connection object.
  */
-function repository_kaltura_get_own_videos($connection) {
+function repository_kaltura_get_own_videos($connection, $page, $per_page) {
     global $USER;
     $results = array();
     $filter = repository_kaltura_create_media_filter('', '', ''); // empty filter
     $filter->userIdEqual = $USER->username; // filter by current user
-    $results = $connection->media->listAction($filter);
+    $filter->orderBy = KalturaBaseEntryOrderBy::CREATED_AT_DESC;
+    $pager = new \KalturaFilterPager();
+    $pager->pageIndex = $page;
+    $pager->pageSize = $per_page;
+    $results = $connection->media->listAction($filter, $pager);
     return $results;
 }
 
