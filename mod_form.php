@@ -25,17 +25,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php');
-
 defined('MOODLE_INTERNAL') || die();
 
-header('Access-Control-Allow-Origin: *');
-header('Cache-Control: no-cache');
-
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
-
-require_login();
 
 /**
  * class of Kaltura Media resource setting form.
@@ -52,147 +44,95 @@ class mod_kalvidres_mod_form extends moodleform_mod {
      * This function outputs a resource information form.
      */
     protected function definition() {
-        global $CFG, $PAGE;
-
-        $kaltura = new kaltura_connection();
-        $connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
-
-        $loginsession = '';
-
-        if (!empty($connection)) {
-            $loginsession = $connection->getKs();
-        }
-
-        /*
-         * This line is needed to avoid a PHP warning when the form is submitted.
-         * Because this value is set as the default for one of the formslib elements.
-         */
-        $uiconf_id = '';
-
-        // Check if connection to Kaltura can be established.
-        if ($connection) {
-            $uiconf_id = local_kaltura_get_player_uiconf('player_resource');
-        }
-
-        if (local_kaltura_has_mobile_flavor_enabled() && local_kaltura_get_enable_html5()) {
-            $url = new moodle_url(local_kaltura_htm5_javascript_url($uiconf_id));
-            $PAGE->requires->js($url, true);
-        }
+        global $PAGE;
 
         $mform =& $this->_form;
 
-        /* Hidden fields */
-        $attr = array('id' => 'entry_id');
-        $mform->addElement('hidden', 'entry_id', '', $attr);
-        $mform->setType('entry_id', PARAM_NOTAGS);
-
+        $mform->addElement('hidden', 'entry_id', '', ['id' => 'entry_id']);
+        $mform->setType('entry_id', PARAM_TEXT);
         $attr = array('id' => 'video_title');
         $mform->addElement('hidden', 'video_title', '', $attr);
         $mform->setType('video_title', PARAM_TEXT);
 
-        $attr = array('id' => 'uiconf_id');
-        $mform->addElement('hidden', 'uiconf_id', '', $attr);
-        $mform->setDefault('uiconf_id', $uiconf_id);
-        $mform->setType('uiconf_id', PARAM_INT);
-
-        $attr = array('id' => 'widescreen');
-        $mform->addElement('hidden', 'widescreen', '', $attr);
-        $mform->setDefault('widescreen', 0);
-        $mform->setType('widescreen', PARAM_INT);
-
-        $attr = array('id' => 'height');
-        $mform->addElement('hidden', 'height', '', $attr);
-        $mform->setDefault('height', '365');
-        $mform->setType('height', PARAM_TEXT);
-
-        $attr = array('id' => 'width');
-        $mform->addElement('hidden', 'width', '', $attr);
-        $mform->setDefault('width', '400');
-        $mform->setType('width', PARAM_TEXT);
-
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         $mform->addElement('text', 'name', get_string('name', 'kalvidres'), array('size'=>'64'));
-
-        if (!empty($CFG->formatstringstriptags)) {
-            $mform->setType('name', PARAM_TEXT);
-        }
-        else {
-            $mform->setType('name', PARAM_CLEANHTML);
-        }
-
+        $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
         $this->standard_intro_elements(get_string('description', 'assign'));
 
-        if (local_kaltura_login(true, '')) {
-            $mform->addElement('header', 'video', get_string('video_hdr', 'kalvidres'));
-			if (empty($this->current->entry_id)) {
-                $this->add_media_definition($mform, null, $connection);
-            }
-            else {
-                $this->add_media_definition($mform, $this->current->entry_id, $connection);
-            }
+        $mform->addElement('header', 'video', get_string('video_hdr', 'mod_kalvidres'));
+        if ($this->current->video_title) {
+            $mform->addElement('static', '', '', '<h5 data-region="selected-entry-header">' . get_string('selected_entry', 'local_kaltura', $this->current->video_title) . "</h5>");
+        } else {
+            $mform->addElement('static', '', '', '<h5 data-region="selected-entry-header">' . get_string('no_selected_entry', 'local_kaltura') . "</h5>");
         }
-        else {
-            $mform->addElement('static', 'connection_fail', get_string('conn_failed_alt', 'local_kaltura'));
-        }
-        $this->add_showpreview_option($mform);
+        $thumbnail_markup = $this->get_thumbnail_markup($this->current->entry_id);
+        $mform->addElement('static', 'add_media_thumb', '&nbsp;', $thumbnail_markup);
+        $buttongroup = [];
+        $buttongroup[] =& $mform->createElement('button', 'add_media', get_string('media_select', 'mod_kalvidres'));
+        $buttongroup[] =& $mform->createElement('button', 'upload_media', get_string('media_upload', 'mod_kalvidres'), ['data-action' => 'upload', 'data-upload-type' => 'media']);
+        $buttongroup[] =& $mform->createElement('button', 'record_media', get_string('webcam_upload', 'mod_kalvidres'), ['data-action' => 'upload', 'data-upload-type' => 'record']);
+        $mform->addGroup($buttongroup, 'media_group', '&nbsp;', '&nbsp;', false);
+
+        $mform->addElement('select', 'showpreview', get_string('showpreview', 'mod_kalvidres'), ['No', 'Yes']);
 
         $mform->addElement('header', 'access', get_string('access_hdr', 'kalvidres'));
-        $this->add_access_definition($mform);
+        $mform->addElement('select', 'internal', get_string('internal', 'mod_kalvidres'), ['No', 'Yes']);
+
         $this->standard_coursemodule_elements();
+
         $this->add_action_buttons();
-    }
 
-    /**
-     * This function add "Access" part to module form.
-     * @param object $mform - form object.
-     */
-    private function add_access_definition($mform) {
-        $accessgroup = array();
-        $options = array('0' => 'No', '1' => 'Yes');
-        $select = $mform->addElement('select', 'internal', get_string('internal', 'mod_kalvidres'), $options);
-        $select->setSelected('0');
-        $accessgroup[] =& $select;
-    }
+        $PAGE->requires->js_amd_inline("
+            require([
+                'core/modal_factory',
+                'core/pubsub',
+                'local_kaltura/modal_video_picker',
+                'local_mymedia/modal_upload',
+                'local_mymedia/mymedia_events',
+                'local_mymedia/mymedia_ajax'
+            ],
+            function(
+                ModalFactory,
+                PubSub,
+                ModalVideoPicker,
+                ModalUpload,
+                MyMediaEvents,
+                MyMediaAjax
+            ){
+                Promise.all([
+                    ModalFactory.create({type: ModalVideoPicker.getType()}),
+                    ModalFactory.create({type: ModalUpload.getType()})
+                ])
+                .then(modals => {
+                    const [modal, modalUpload] = modals;
 
-  /**
-   * This function add "show preview" part to module form.
-   * @param object $mform - form object.
-   */
-  private function add_showpreview_option($mform) {
-      $previewgroup = array();
-      $options = array('0' => 'No', '1' => 'Yes');
-      $select = $mform->addElement('select', 'showpreview', get_string('showpreview', 'mod_kalvidres'), $options);
-      $select->setSelected('0');
-      $previewgroup[] =& $select;
-  }
+                    modal.contextid = {$PAGE->context->id};
+                    $('#id_add_media').on('click', () => {
+                        modal.show();
+                    });
 
-    /**
-     * This function add "Media" part to module form.
-     * @param object $mform - form object.
-     * @param string $entry_id - id of media entry.
-     */
-    private function add_media_definition($mform, $entry_id, $connection) {
-        global $PAGE;
-        $local_kaltura_renderer = $PAGE->get_renderer('local_kaltura');
-        $local_mymedia_renderer = $PAGE->get_renderer('local_mymedia');
+                    $('[data-action=\"upload\"').on('click', (e) => {
+                        modalUpload.renderUploadForm({$PAGE->context->id}, $(e.currentTarget).attr('data-upload-type'));
+                    });
 
-        $thumbnail = $this->get_thumbnail_markup($entry_id);
-        $mform->addElement('static', 'add_media_thumb', '&nbsp;', $thumbnail);
-
-        $mform->addElement('html', $local_kaltura_renderer->create_selector_modal());
-        $mform->addElement('html', $local_mymedia_renderer->render_from_template('local_mymedia/mod_progress_modal', ['back_link'=>'#']));
-        $simple_uploader = new \local_mymedia\output\simple_uploader($connection);
-        $mform->addElement('html', $local_mymedia_renderer->render_simple_upload_modal($simple_uploader));
-        $mform->addElement('html', $local_mymedia_renderer->render_webcam_upload_modal($simple_uploader));
-        $mediagroup = array();
-        $mediagroup[] =& $mform->createElement('button', 'add_media', get_string('media_select', 'kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#selector_modal']);
-        $mediagroup[] =& $mform->createElement('button', 'upload_media', get_string('media_upload', 'mod_kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#simple_upload_modal']);
-        $mediagroup[] =& $mform->createElement('button', 'record_media', get_string('webcam_upload', 'mod_kalvidres'), ['data-toggle'=>'modal', 'data-target'=>'#webcam_upload_modal']);
-
-        $mform->addGroup($mediagroup, 'media_group', '&nbsp;', '&nbsp;', false);
+                    PubSub.subscribe(MyMediaEvents.uploadComplete, (entryid) => {
+                        MyMediaAjax.getEntry({$PAGE->context->id}, entryid)
+                            .then((entry) => {
+                                console.log(entry);
+                                $('#entry_id').val(entry.id);
+                                $('#id_name').val(entry.name);
+                                $('#media_thumbnail').attr('src', entry.thumbnailUrl);
+                                $('#video_title').val(entry.name);
+                                getString('selected_entry', 'local_kaltura', entry.name)
+                                .then(string => $('[data-region=\"selected-entry-header\"]').text(string));
+                            });
+                    });
+                });
+            });
+        ");
     }
 
     /**
@@ -205,10 +145,6 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $source = '';
 
-        /*
-         * tabindex -1 is required in order for the focus event to be capture
-         * amongst all browsers.
-         */
         $attr = array('id' => 'notification',
                       'class' => 'notification',
                       'tabindex' => '-1');
@@ -219,7 +155,6 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $title  = get_string('media_select', 'kalvidres');
 
         if (!empty($entry_id)) {
-			$entries = new KalturaStaticEntries();
             $entryobj = KalturaStaticEntries::getEntry($entry_id, null, false);
             if (isset($entryobj->thumbnailUrl)) {
                 $source = $entryobj->thumbnailUrl;
@@ -232,7 +167,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $attr = array('id' => 'media_thumbnail',
                       'src' => $source,
                       'alt' => $alt,
-                      'title' => $title);
+                      'title' => $title,
+                      'class' => 'kaltura-selected-thumb');
 
         $output .= html_writer::empty_tag('img', $attr);
 

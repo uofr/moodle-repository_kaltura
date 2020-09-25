@@ -25,13 +25,7 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(dirname(dirname(__FILE__))) . '/local/kaltura/locallib.php');
 
-defined('MOODLE_INTERNAL') || die();
-
-header('Access-Control-Allow-Origin: *');
-header('Cache-Control: no-cache');
-
 $id = required_param('id', PARAM_INT);
-$doAutoPlay = optional_param('autoPlay', 0, PARAM_INT);
 
 $cm = get_coursemodule_from_id('kalvidres', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -39,24 +33,10 @@ $kalvidres = $DB->get_record('kalvidres', array("id"=>$cm->instance), '*', MUST_
 
 require_login($course, true, $cm);
 
-$PAGE->set_url('/mod/kalvidres/view.php', array('id' => $id, 'autoPlay' => $doAutoPlay));
+$PAGE->set_url('/mod/kalvidres/view.php', array('id' => $id));
 $PAGE->set_title(format_string($kalvidres->name));
 $url = $CFG->wwwroot . '/mod/kalvidres/trigger.php';
 $PAGE->requires->js_call_amd('mod_kalvidres/playtrigger', 'init', array($url, $id));
-
-// Try connection.
-$kaltura = new kaltura_connection();
-$connection = $kaltura->get_connection(true, KALTURA_SESSION_LENGTH);
-
-if ($connection) {
-    if (local_kaltura_has_mobile_flavor_enabled() && local_kaltura_get_enable_html5()) {
-        $uiconf_id = local_kaltura_get_player_uiconf('player_resource');
-        $url = new moodle_url(local_kaltura_htm5_javascript_url($uiconf_id));
-        $PAGE->requires->js($url, true);
-        $url = new moodle_url('/local/kaltura/js/frameapi.js');
-        $PAGE->requires->js($url, true);
-    }
-}
 
 $event = \mod_kalvidres\event\media_resource_viewed::create(array(
     'objectid' => $kalvidres->id,
@@ -76,31 +56,10 @@ $clientipaddress = local_kaltura_get_client_ipaddress(true);
 if ($kalvidres->internal == 1 and !local_kaltura_check_internal($clientipaddress)) {
     print_error('invalid_ipaddress', 'mod_kalvidres');
 }
-if (!$connection) {
-    print_error('conn_failed_alt', 'local_kaltura');
-}
 
 local_kaltura_validate_entry_id($kalvidres);
 
-try {
-    $media = $connection->media->get($kalvidres->entry_id);
-    if ($media !== null) {
-        $enabled = local_kaltura_kaltura_repository_enabled();
-        if ($enabled) {
-            require_once($CFG->dirroot.'/repository/kaltura/locallib.php');
-            $category = repository_kaltura_create_course_category($connection, $course->id);
-        }
-        if (!empty($category) && $enabled) {
-            repository_kaltura_add_video_course_reference($connection, $course->id, array($kalvidres->entry_id));
-        }
-        echo $renderer->embed_media($kalvidres);
-    }
-}
-catch (Exception $ex) {
-    echo '<div class="alert alert-warning"><p>';
-    echo 'Entry Id <b>' . $kalvidres->entry_id. '</b> could not be found.';
-    echo '</p></div>';
-}
+echo $renderer->embed_media($kalvidres);
 
 $admin = is_siteadmin();
 $teacher = false;
