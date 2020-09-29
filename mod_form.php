@@ -50,8 +50,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $mform->addElement('hidden', 'entry_id', '', ['id' => 'entry_id']);
         $mform->setType('entry_id', PARAM_TEXT);
-        $attr = array('id' => 'video_title');
-        $mform->addElement('hidden', 'video_title', '', $attr);
+
+        $mform->addElement('hidden', 'video_title', '', ['id' => 'video_title']);
         $mform->setType('video_title', PARAM_TEXT);
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -63,18 +63,20 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $this->standard_intro_elements(get_string('description', 'assign'));
 
         $mform->addElement('header', 'video', get_string('video_hdr', 'mod_kalvidres'));
-        if ($this->current->video_title) {
-            $mform->addElement('static', '', '', '<h5 data-region="selected-entry-header">' . get_string('selected_entry', 'local_kaltura', $this->current->video_title) . "</h5>");
-        } else {
-            $mform->addElement('static', '', '', '<h5 data-region="selected-entry-header">' . get_string('no_selected_entry', 'local_kaltura') . "</h5>");
+
+        $card_title_text = $this->current->video_title
+            ? get_string('selected_entry', 'local_kaltura', $this->current->video_title)
+            : get_string('no_selected_entry', 'local_kaltura');
+        $selected_entry_header = html_writer::tag('h5', $card_title_text, ['data-region' => 'selected-entry-header']);
+        $mform->addElement('static', '', '', $selected_entry_header);
+
+        if ($this->current->entry_id) {
+            $entryobj = KalturaStaticEntries::getEntry($this->current->entry_id, null, false);
         }
-        $thumbnail_markup = $this->get_thumbnail_markup($this->current->entry_id);
+        $thumbnail_markup = $this->get_thumbnail_markup($entryobj);
         $mform->addElement('static', 'add_media_thumb', '&nbsp;', $thumbnail_markup);
-        $buttongroup = [];
-        $buttongroup[] =& $mform->createElement('button', 'add_media', get_string('media_select', 'mod_kalvidres'));
-        $buttongroup[] =& $mform->createElement('button', 'upload_media', get_string('media_upload', 'mod_kalvidres'), ['data-action' => 'upload', 'data-upload-type' => 'media']);
-        $buttongroup[] =& $mform->createElement('button', 'record_media', get_string('webcam_upload', 'mod_kalvidres'), ['data-action' => 'upload', 'data-upload-type' => 'record']);
-        $mform->addGroup($buttongroup, 'media_group', '&nbsp;', '&nbsp;', false);
+
+        $mform->addElement('button', 'add_media', get_string('media_select', 'mod_kalvidres'));
 
         $mform->addElement('select', 'showpreview', get_string('showpreview', 'mod_kalvidres'), ['No', 'Yes']);
 
@@ -85,92 +87,33 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $this->add_action_buttons();
 
-        $PAGE->requires->js_amd_inline("
-            require([
-                'core/modal_factory',
-                'core/pubsub',
-                'local_kaltura/modal_video_picker',
-                'local_mymedia/modal_upload',
-                'local_mymedia/mymedia_events',
-                'local_mymedia/mymedia_ajax'
-            ],
-            function(
-                ModalFactory,
-                PubSub,
-                ModalVideoPicker,
-                ModalUpload,
-                MyMediaEvents,
-                MyMediaAjax
-            ){
-                Promise.all([
-                    ModalFactory.create({type: ModalVideoPicker.getType()}),
-                    ModalFactory.create({type: ModalUpload.getType()})
-                ])
-                .then(modals => {
-                    const [modal, modalUpload] = modals;
-
-                    modal.contextid = {$PAGE->context->id};
-                    $('#id_add_media').on('click', () => {
-                        modal.show();
-                    });
-
-                    $('[data-action=\"upload\"').on('click', (e) => {
-                        modalUpload.renderUploadForm({$PAGE->context->id}, $(e.currentTarget).attr('data-upload-type'));
-                    });
-
-                    PubSub.subscribe(MyMediaEvents.uploadComplete, (entryid) => {
-                        MyMediaAjax.getEntry({$PAGE->context->id}, entryid)
-                            .then((entry) => {
-                                console.log(entry);
-                                $('#entry_id').val(entry.id);
-                                $('#id_name').val(entry.name);
-                                $('#media_thumbnail').attr('src', entry.thumbnailUrl);
-                                $('#video_title').val(entry.name);
-                                getString('selected_entry', 'local_kaltura', entry.name)
-                                .then(string => $('[data-region=\"selected-entry-header\"]').text(string));
-                            });
-                    });
-                });
-            });
-        ");
+        $PAGE->requires->js_call_amd('mod_kalvidres/kalvidres_mod_form', 'init', [
+                $PAGE->context->id,
+                $this->current->entry_id,
+                $this->current->video_title,
+                $entryobj->thumbnailUrl
+            ]);
     }
 
     /**
      * This function return HTML markup to display thumbnail.
-     * @param string $entry_id - id of media entry.
+     * @param \KalturaMediaEntry
      * @return string - HTML markup to display thumbnail.
      */
-    private function get_thumbnail_markup($entry_id) {
+    private function get_thumbnail_markup($entryobj) {
         global $CFG;
 
-        $source = '';
+        $output = html_writer::start_div();
 
-        $attr = array('id' => 'notification',
-                      'class' => 'notification',
-                      'tabindex' => '-1');
-        $output = html_writer::tag('div', '', $attr);
+        $output .= html_writer::empty_tag('img', [
+            'id' => 'media_thumbnail',
+            'src' => $entryobj ? $entryobj->thumbnailUrl . '/width/360/height/200/' : $CFG->wwwroot . '/local/kaltura/pix/vidThumb.png',
+            'alt' => $entryobj ? $entryobj->name : get_string('media_select', 'kalvidres'),
+            'title' => $entryobj ? $entryobj->name : get_string('media_select', 'kalvidres'), 
+            'class' => 'kaltura-media-thumbnail'
+        ]);
 
-        $source = $CFG->wwwroot . '/local/kaltura/pix/vidThumb.png';;
-        $alt    = get_string('media_select', 'kalvidres');
-        $title  = get_string('media_select', 'kalvidres');
-
-        if (!empty($entry_id)) {
-            $entryobj = KalturaStaticEntries::getEntry($entry_id, null, false);
-            if (isset($entryobj->thumbnailUrl)) {
-                $source = $entryobj->thumbnailUrl;
-                $alt    = $entryobj->name;
-                $title  = $entryobj->name;
-            }
-
-        }
-
-        $attr = array('id' => 'media_thumbnail',
-                      'src' => $source,
-                      'alt' => $alt,
-                      'title' => $title,
-                      'class' => 'kaltura-selected-thumb');
-
-        $output .= html_writer::empty_tag('img', $attr);
+        $output .= html_writer::end_div();
 
         return $output;
 
