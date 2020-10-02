@@ -46,6 +46,8 @@ class mod_kalvidres_mod_form extends moodleform_mod {
     protected function definition() {
         global $PAGE;
 
+        $kaltura_renderer = $PAGE->get_renderer('local_kaltura');
+
         $mform =& $this->_form;
 
         $mform->addElement('hidden', 'entry_id', '', ['id' => 'entry_id']);
@@ -64,10 +66,10 @@ class mod_kalvidres_mod_form extends moodleform_mod {
 
         $mform->addElement('header', 'video', get_string('video_hdr', 'mod_kalvidres'));
 
-        $card_title_text = $this->current->video_title
+        $selected_entry_text = $this->current->video_title
             ? get_string('selected_entry', 'local_kaltura', $this->current->video_title)
             : get_string('no_selected_entry', 'local_kaltura');
-        $selected_entry_header = html_writer::tag('h5', $card_title_text, ['data-region' => 'selected-entry-header']);
+        $selected_entry_header = html_writer::tag('h5', $selected_entry_text, ['data-region' => 'selected-entry-header']);
         $mform->addElement('static', '', '', $selected_entry_header);
 
         if ($this->current->entry_id) {
@@ -76,7 +78,11 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $thumbnail_markup = $this->get_thumbnail_markup($entryobj);
         $mform->addElement('static', 'add_media_thumb', '&nbsp;', $thumbnail_markup);
 
-        $mform->addElement('button', 'add_media', get_string('media_select', 'mod_kalvidres'));
+        $buttongroup = [];
+        $upload_dropdown_markup = $kaltura_renderer->render_from_template('local_kaltura/kaltura_upload_menu', []);
+        $buttongroup[] =& $mform->createElement('button', 'add_media', get_string('media_select', 'mod_kalvidres'));
+        $buttongroup[] =& $mform->createElement('html', $upload_dropdown_markup);
+        $mform->addGroup($buttongroup);
 
         $mform->addElement('select', 'showpreview', get_string('showpreview', 'mod_kalvidres'), ['No', 'Yes']);
 
@@ -88,11 +94,11 @@ class mod_kalvidres_mod_form extends moodleform_mod {
         $this->add_action_buttons();
 
         $PAGE->requires->js_call_amd('mod_kalvidres/kalvidres_mod_form', 'init', [
-                $PAGE->context->id,
-                $this->current->entry_id,
-                $this->current->video_title,
-                $entryobj->thumbnailUrl
-            ]);
+            $PAGE->context->id,
+            $this->current->entry_id,
+            $this->current->video_title,
+            $entryobj->thumbnailUrl
+        ]);
     }
 
     /**
